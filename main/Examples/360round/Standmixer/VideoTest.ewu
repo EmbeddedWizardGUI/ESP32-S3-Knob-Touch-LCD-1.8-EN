@@ -1,0 +1,143 @@
+$version 15.01
+
+// Minimal video test application with detailed logging
+$rect <20,20,220,60>
+$output false
+class VideoTestApp : Core::Root
+{
+  $rect <500,0,700,40>
+  inherited method Init()
+  {
+    $if ! $prototyper
+    MainSources[ 0 ] = "flash://sample_video_10s.avi";
+    $endif
+
+    trace "=== VideoTest Init ===";
+    trace "  MainVideo.Visible: ", MainVideo.Visible;
+    trace "  MainVideo.Bounds: ", MainVideo.Bounds;
+    trace "  Speed: ", MainVideoSource.Speed;
+    trace "  State BEFORE: ", MainVideoSource.GetState();
+
+    SelectedMainSource = 0;
+
+    trace "  State AFTER: ", MainVideoSource.GetState();
+    trace "  Name: ", MainVideoSource.Name;
+    trace "  FrameSize: ", MainVideoSource.FrameSize;
+
+    // Start debug poll timer
+    DebugTimer.Enabled = true;
+  }
+
+  $rect <500,40,700,80>
+  inherited property Bounds = <0,0,360,360>;
+
+  $rect <220,380,420,420>
+  object Resources::ExternVideo MainVideoSource
+  {
+    preset OnChangeState = OnStateChangedMain;
+    preset Speed = 100;
+  }
+
+  $rect <20,20,160,60>
+  object Views::Rectangle MainVideoBackground
+  {
+    preset Bounds = <0,0,360,360>;
+    preset Color = #000000FF;
+    preset AlphaBlended = false;
+    preset Visible = true;
+  }
+
+  $rect <20,20,160,60>
+  object Views::Image MainVideo
+  {
+    preset Bounds = <0,0,360,360>;
+    preset Color = #FFFFFFFF;
+    preset Bitmap = MainVideoSource;
+    preset AlphaBlended = false;
+    preset Visible = true;
+  }
+
+  $rect <220,460,420,500>
+  property int32 SelectedMainSource = -1;
+
+  $rect <220,500,420,540>
+  onset SelectedMainSource
+  {
+    pure SelectedMainSource = value;
+
+    var string source = MainSources[ SelectedMainSource ];
+
+    $if $prototyper || $composer
+    source = source.insert( $PrototyperMediaPath, 0 );
+    $endif
+
+    trace "  onset: setting Name to: ", source;
+    MainVideoSource.Name = source;
+    trace "  onset: State after Name set: ", MainVideoSource.GetState();
+  }
+
+  $rect <10,460,210,500>
+  slot OnNext
+  {
+    sender;
+
+    if ( SelectedMainSource == MainSources.size - 1 )
+      SelectedMainSource = 0;
+    else
+      SelectedMainSource++;
+
+    MainVideoSource.Paused = 0;
+  }
+
+  $rect <220,420,420,460>
+  array string MainSources[ 1 ] =
+  (
+    Default[0] = "sample_video_10s.avi";
+  );
+
+  $rect <220,540,420,580>
+  slot OnStateChangedMain
+  {
+    var Resources::ExternVideo       externVideo = (Resources::ExternVideo)sender;
+    var Resources::ExternVideoState  state = externVideo.GetState();
+
+    trace "  [state change] state=", state;
+
+    switch (state)
+    {
+      case Resources::ExternVideoState.EndOfStreamReached:
+      {
+        trace "  -> EndOfStreamReached, restarting";
+        MainVideoSource.Name = "";
+        postsignal OnRestartVideo;
+      }
+
+      default:
+        ;
+    }
+  }
+
+  $rect <10,500,210,540>
+  slot OnRestartVideo
+  {
+    sender;
+    signal OnNext;
+  }
+
+  $rect <10,540,210,580>
+  object Core::Timer DebugTimer
+  {
+    preset Period = 500;
+    preset OnTrigger = OnDebugTick;
+    preset Enabled = false;
+  }
+
+  $rect <10,580,210,620>
+  slot OnDebugTick
+  {
+    trace "  [poll] State: ", MainVideoSource.GetState(),
+      " Paused: ", MainVideoSource.Paused,
+      " FrameSize: ", MainVideoSource.FrameSize,
+      " Name: ", MainVideoSource.Name;
+  }
+}

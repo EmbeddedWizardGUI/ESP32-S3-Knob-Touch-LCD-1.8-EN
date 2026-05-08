@@ -1,0 +1,358 @@
+/*******************************************************************************
+*
+* Embedded Wizard - GUI Solutions by TARA Systems
+*
+*                                                Copyright (c) TARA Systems GmbH
+*                                    written by Paul Banach and Manfred Schweyer
+*
+********************************************************************************
+*
+* This file was generated automatically by Embedded Wizard tools based on the
+* GUI project configuration and resources provided by you.
+*
+* Please do not modify this file! Any changes will be lost when it is generated
+* again by the Embedded Wizard code generation process.
+*
+* The template of this heading text can be found in the file 'head.ewt' in the
+* directory 'Platforms' of your Embedded Wizard installation directory. If you
+* wish to adapt this text, please copy 'head.ewt' into your project directory
+* and edit only that copy. Please avoid any modifications of the original
+* template file.
+*
+* License, ownership and responsibility:
+*
+*   - The generated code is based on your project configuration and forms part
+*     of your application. The application-specific content of this file
+*     (including project-specific classes, resources and UI logic) is owned by
+*     you or your licensors. You remain responsible for the overall design,
+*     implementation, testing and validation of your application, including any
+*     project-specific code and any changes or additions you make to the
+*     generated code. TARA Systems GmbH is not responsible for defects or
+*     malfunctions caused by such project-specific content or modifications.
+*
+*   - The use of Embedded Wizard Studio, the Embedded Wizard command line code
+*     generator (ChoraC), the Embedded Wizard technology used to generate this
+*     file and any Embedded Wizard Platform Packages and Runtime Components
+*     required to build and run the generated code is subject to the Embedded
+*     Wizard license terms (as published at https://www.embedded-wizard.de/legal),
+*     including in particular:
+*
+*       - Embedded Wizard Terms and Conditions (EWTC)
+*       - Embedded Wizard License Agreement (EWLA)
+*       - Embedded Wizard Community License (EWCL)
+*
+*     The specific agreement(s) applicable to you and the applicable warranties
+*     and limitations of liability are exclusively governed by these license
+*     terms.
+*
+* Version  : 15.03
+* Profile  : ESP32
+* Platform : Espressif.ESP32.RGB565
+*
+*******************************************************************************/
+
+#ifndef _CoreView_H
+#define _CoreView_H
+
+#ifdef __cplusplus
+  extern "C"
+  {
+#endif
+
+#include "ewrte.h"
+#if ( EW_RTE_VERSION >> 16 ) != 15
+  #error Wrong version of Embedded Wizard Runtime Environment.
+#endif
+
+#include "ewgfx.h"
+#if ( EW_GFX_VERSION >> 16 ) != 15
+  #error Wrong version of Embedded Wizard Graphics Engine.
+#endif
+
+/* Forward declaration of the class Core::CursorHit */
+#ifndef _CoreCursorHit_
+  EW_DECLARE_CLASS( CoreCursorHit )
+#define _CoreCursorHit_
+#endif
+
+/* Forward declaration of the class Core::Event */
+#ifndef _CoreEvent_
+  EW_DECLARE_CLASS( CoreEvent )
+#define _CoreEvent_
+#endif
+
+/* Forward declaration of the class Core::Group */
+#ifndef _CoreGroup_
+  EW_DECLARE_CLASS( CoreGroup )
+#define _CoreGroup_
+#endif
+
+/* Forward declaration of the class Core::LayoutContext */
+#ifndef _CoreLayoutContext_
+  EW_DECLARE_CLASS( CoreLayoutContext )
+#define _CoreLayoutContext_
+#endif
+
+/* Forward declaration of the class Core::Root */
+#ifndef _CoreRoot_
+  EW_DECLARE_CLASS( CoreRoot )
+#define _CoreRoot_
+#endif
+
+/* Forward declaration of the class Core::View */
+#ifndef _CoreView_
+  EW_DECLARE_CLASS( CoreView )
+#define _CoreView_
+#endif
+
+/* Forward declaration of the class Graphics::Canvas */
+#ifndef _GraphicsCanvas_
+  EW_DECLARE_CLASS( GraphicsCanvas )
+#define _GraphicsCanvas_
+#endif
+
+
+/* The class Core::View provides the base functionality for all visual components. 
+   This class implements a set of methods and properties to manage the view, to 
+   redraw its content, to receive and handle any user input events and to arrange 
+   it on the screen. 
+   The class Core::View doesn't define any particular behavior nor appearance. It 
+   exists as an empty base for all derived view classes like the Views::Text or 
+   Views::Image.
+   Views never appear alone. Within a GUI application they are composed to complex 
+   GUI components, like the push button or the slider. This composition is done 
+   by the class Core::Group. In this manner each view belongs to a superior group 
+   and can be managed by this group. For example, showing the group makes visible 
+   all enclosed views automatically. */
+EW_DEFINE_FIELDS( CoreView, XObject )
+  EW_VARIABLE( next,            CoreView )
+  EW_VARIABLE( prev,            CoreView )
+  EW_VARIABLE( Owner,           CoreGroup )
+  EW_VARIABLE( layoutContext,   CoreLayoutContext )
+  EW_VARIABLE( viewState,       XSet )
+EW_END_OF_FIELDS( CoreView )
+
+/* Virtual Method Table (VMT) for the class : 'Core::View' */
+EW_DEFINE_METHODS( CoreView, XObject )
+  EW_METHOD( GetRoot,           CoreRoot )( CoreView _this )
+  EW_METHOD( Draw,              void )( CoreView _this, GraphicsCanvas aCanvas, 
+    XRect aClip, XPoint aOffset, XInt32 aOpacity, XBool aBlend )
+  EW_METHOD( GetClipping,       XRect )( CoreView _this )
+  EW_METHOD( HandleEvent,       XObject )( CoreView _this, CoreEvent aEvent )
+  EW_METHOD( CursorHitTest,     CoreCursorHit )( CoreView _this, XRect aArea, XInt32 
+    aFinger, XInt32 aStrikeCount, CoreView aDedicatedView, CoreView aStartView, 
+    XSet aRetargetReason )
+  EW_METHOD( AdjustDrawingArea, XRect )( CoreView _this, XRect aArea )
+  EW_METHOD( ArrangeView,       XPoint )( CoreView _this, XRect aBounds, XEnum aFormation )
+  EW_METHOD( MoveView,          void )( CoreView _this, XPoint aOffset, XBool aFastMove )
+  EW_METHOD( GetExtent,         XRect )( CoreView _this )
+  EW_METHOD( ChangeViewState,   void )( CoreView _this, XSet aSetState, XSet aClearState )
+EW_END_OF_METHODS( CoreView )
+
+/* The method GetRoot() delivers the application object, this view belongs to. The 
+   application object represents the entire screen of the GUI application. Thus 
+   in the views hierarchy, the application object serves as the root view.
+   This method can fail and return null if the view still doesn't belong to any 
+   owner group. */
+CoreRoot CoreView_GetRoot( CoreView _this );
+
+/* Wrapper function for the virtual method : 'Core::View.GetRoot()' */
+CoreRoot CoreView__GetRoot( void* _this );
+
+/* The method Draw() is invoked automatically if parts of the view should be redrawn 
+   on the screen. This can occur when e.g. the view has been moved or the appearance 
+   of the view has changed before.
+   Draw() is invoked automatically by the framework, you will never need to invoke 
+   this method directly. However you can request an invocation of this method by 
+   calling the method InvalidateArea() of the views @Owner. Usually this is also 
+   unnecessary unless you are developing your own view.
+   The passed parameters determine the drawing destination aCanvas and the area 
+   to redraw aClip in the coordinate space of the canvas. The parameter aOffset 
+   contains the displacement between the origin of the views owner and the origin 
+   of the canvas. You will need it to convert views coordinates into these of the 
+   canvas.
+   The parameter aOpacity contains the opacity descended from this view's @Owner. 
+   It lies in range 0 .. 255. If the view implements its own 'Opacity', 'Color', 
+   etc. properties, the Draw() method should calculate the resulting real opacity 
+   by mixing the values of these properties with the one passed in aOpacity parameter.
+   The parameter aBlend contains the blending mode descended from this view's @Owner. 
+   It determines, whether the view should be drawn with alpha-blending active or 
+   not. If aBlend is false, the outputs of the view should overwrite the corresponding 
+   pixel in the drawing destination aCanvas. If aBlend is true, the outputs should 
+   be mixed with the pixel already stored in aCanvas. For this purpose all Graphics 
+   Engine functions provide a parameter to specify the mode for the respective drawing 
+   operation. If the view implements its own 'Blend' property, the Draw() method 
+   should calculate the resulting real blend mode by using logical AND operation 
+   of the value of the property and the one passed in aBlend parameter. */
+void CoreView_Draw( CoreView _this, GraphicsCanvas aCanvas, XRect aClip, XPoint 
+  aOffset, XInt32 aOpacity, XBool aBlend );
+
+/* Wrapper function for the virtual method : 'Core::View.Draw()' */
+void CoreView__Draw( void* _this, GraphicsCanvas aCanvas, XRect aClip, XPoint aOffset, 
+  XInt32 aOpacity, XBool aBlend );
+
+/* The method GetClipping() returns the clipping area of the view as rectangle relative 
+   to the origin of the view's @Owner. With the returned clipping area the view 
+   limits its own visibility. Contents belonging to the view and lying outside this 
+   area will not be displayed - they are clipped during the screen update process.
+   Per default the clipping area corresponds to the boundary area of the view (see 
+   also @GetExtent()). Derived views can override GetClipping() and enlarge the 
+   area so the view can display additional contents (e.g. shadows or decoration) 
+   outside of its original boundary area. */
+XRect CoreView_GetClipping( CoreView _this );
+
+/* Wrapper function for the virtual method : 'Core::View.GetClipping()' */
+XRect CoreView__GetClipping( void* _this );
+
+/* The following define announces the presence of the method Core::View.GetClipping(). */
+#define _CoreView__GetClipping_
+
+/* The method HandleEvent() is invoked automatically if the view has received an 
+   event. For example, touching the view on the touch screen can cause the view 
+   to receive a Core::CursorEvent event. Within this method the view can evaluate 
+   the event and react to it.
+   Whether the event has been handled by the view or not is determined by the return 
+   value. To sign an event as handled HandleEvent() should return a valid object 
+   (e.g. 'this'). If the event has not been handled, 'null' should be returned.
+   Depending on the kind of the event, the framework can continue dispatching of 
+   still unhandled events. For example, keyboard events (Core::KeyEvent class) are 
+   automatically delivered to the superior @Owner of the receiver view if this view 
+   has ignored the event.
+   HandleEvent() is invoked automatically by the framework, so you never should 
+   need to invoke it directly. However you can prepare and post new events by using 
+   the methods DispatchEvent() and BroadcastEvent() of the application class Core::Root. */
+XObject CoreView_HandleEvent( CoreView _this, CoreEvent aEvent );
+
+/* Wrapper function for the virtual method : 'Core::View.HandleEvent()' */
+XObject CoreView__HandleEvent( void* _this, CoreEvent aEvent );
+
+/* The method CursorHitTest() is invoked automatically in order to determine whether 
+   the view is interested in the receipt of cursor events or not. This method will 
+   be invoked immediately after the user has tapped the visible area of the view. 
+   If the view is not interested in the cursor event, the framework repeats this 
+   procedure for the next behind view until a willing view has been found or all 
+   views are evaluated.
+   In the implementation of the method the view can evaluate the passed aArea parameter. 
+   It determines the place where the user has tapped the view with his fingertip 
+   expressed in the coordinates of the views @Owner. The method can test e.g. whether 
+   the tapped area does intersect any touchable areas within the view, etc. The 
+   affected finger is identified in the parameter aFinger. The first finger (or 
+   the first mouse device button) has the number 0.
+   The parameter aStrikeCount determines how many times the same area has been tapped 
+   in series. This is useful to detect series of multiple touches, e.g. in case 
+   of the double click, aStrikeCount == 2.
+   The parameter aDedicatedView, if it is not 'null', restricts the event to be 
+   handled by this view only. If aDedicatedView == null, no special restriction 
+   exists.
+   The parameter aStartView, if it is not 'null', restricts the event to be handled 
+   by the specified view or another view lying behind it. In other words, views 
+   found in front of aStartView are not taken in account during the hit-test operation.
+   This method is also invoked if during an existing grab cycle the current target 
+   view has decided to resign and deflect the cursor events to another view. This 
+   is usually the case after the user has performed a gesture the current target 
+   view is not interested to process. Thereupon, the system looks for another view 
+   willing to take over the cursor event processing after the performed gesture. 
+   Which gesture has caused the operation, is specified in the parameter aRetargetReason.
+   If the view is willing to process the event, the method should create, initialize 
+   and return a new Core::CursorHit object. This object identify the willing view. 
+   Otherwise the method should return 'null'.
+   CursorHitTest() is invoked automatically by the framework, so you never should 
+   need to invoke it directly. This method is predetermined for the hit-test only. 
+   The proper processing of events should take place in the @HandleEvent() method 
+   by reacting to Core::CursorEvent and Core::DragEvent events. */
+CoreCursorHit CoreView_CursorHitTest( CoreView _this, XRect aArea, XInt32 aFinger, 
+  XInt32 aStrikeCount, CoreView aDedicatedView, CoreView aStartView, XSet aRetargetReason );
+
+/* Wrapper function for the virtual method : 'Core::View.CursorHitTest()' */
+CoreCursorHit CoreView__CursorHitTest( void* _this, XRect aArea, XInt32 aFinger, 
+  XInt32 aStrikeCount, CoreView aDedicatedView, CoreView aStartView, XSet aRetargetReason );
+
+/* The method AdjustDrawingArea() is invoked before the update (drawing) of a screen 
+   area has begun. The view can thereupon evaluate the affected area and eventually 
+   enlarge it. AdjustDrawingArea() is invoked automatically by the framework, you 
+   will never need to invoke this method directly.
+   Enlarging the update area is necessary if parts of the view surrounding this 
+   area are affected by the content within this area. For example, the contents 
+   are blurred. As consequence the surrounding area has to be taken in account during 
+   the screen update too.
+   The original area is passed in the parameter aArea and it is expressed in coordinates 
+   relative to the top-left corner of the view's @Owner. If necessary, the view 
+   can enlarge this area and return it in this method. If the view doesn't want 
+   to enlarge the area (what is the most usual case), it returns aArea unchanged. */
+XRect CoreView_AdjustDrawingArea( CoreView _this, XRect aArea );
+
+/* Wrapper function for the virtual method : 'Core::View.AdjustDrawingArea()' */
+XRect CoreView__AdjustDrawingArea( void* _this, XRect aArea );
+
+/* The method ArrangeView() is invoked automatically if the superior @Owner group 
+   needs to re-arrange its views. For example, the changing of the owners size can 
+   cause the enclosed views to adapt their position and size, so all views still 
+   fit within the new owners area. This method provides the core functionality for 
+   the automatic GUI layout mechanism.
+   The arrangement is controlled primarily by the @Layout property of the view. 
+   It specifies a set of alignment constraints and determines whether the view can 
+   change its size. The bounds area where the view should be arranged, is passed 
+   in the parameter aBounds. This is usually the current area of the views owner.
+   The parameter aFormation defines the desired arrangement mode. Depending on the 
+   value of this parameter, the views can be arranged in rows or columns. If aFormation 
+   == Core::Formation.None, no automatic row/column arrangement is performed and 
+   the view is moved and scaled only to fit inside the aBounds area.
+   ArrangeView() is invoked automatically by the framework, so you never should 
+   need to invoke it directly.
+   The method returns the size of the view after it has been arranged. */
+XPoint CoreView_ArrangeView( CoreView _this, XRect aBounds, XEnum aFormation );
+
+/* Wrapper function for the virtual method : 'Core::View.ArrangeView()' */
+XPoint CoreView__ArrangeView( void* _this, XRect aBounds, XEnum aFormation );
+
+/* The method MoveView() changes the position of the view by adding the value aOffset 
+   to all corners of the view. For example, in case of a line view the value is 
+   added to the both line end points.
+   The parameter aFastMove serves for the optimization purpose. If it is 'true', 
+   the corners are modified without performing any updates of the view and without 
+   redrawing the screen. This is useful, when you wish to move or arrange a lot 
+   of views at once. In this case it's up to you to request the finally screen update. 
+   To do this you can use the method InvalidateArea() of the views @Owner.
+   In the case aFastMove == false, the operation automatically requests the screen 
+   redraw of the view areas before and after the movement. You don't need to take 
+   care about it. */
+void CoreView_MoveView( CoreView _this, XPoint aOffset, XBool aFastMove );
+
+/* Wrapper function for the virtual method : 'Core::View.MoveView()' */
+void CoreView__MoveView( void* _this, XPoint aOffset, XBool aFastMove );
+
+/* The method GetExtent() returns the position and the size of the view relative 
+   to the origin of its @Owner. In case of views with a non rectangular shape the 
+   method returns the rectangular boundary area enclosing the entire shape. */
+XRect CoreView_GetExtent( CoreView _this );
+
+/* Wrapper function for the virtual method : 'Core::View.GetExtent()' */
+XRect CoreView__GetExtent( void* _this );
+
+/* The following define announces the presence of the method Core::View.GetExtent(). */
+#define _CoreView__GetExtent_
+
+/* The method ChangeViewState() modifies the current state of the view. The state 
+   is a set of switches determining whether a view is visible, whether it can react 
+   to user inputs or whether it is just performing some update operations, etc.
+   The modification is controlled by the both parameters. The first aSetState contains 
+   the switches to activate within the view state. The second aClearState determines 
+   all switches to disable.
+   Depending on the state alteration the method will perform different operations, 
+   e.g. in response to the clearing of the visible state, the method will request 
+   a screen redraw to make disappear the view from the screen.
+   ChangeViewState() is invoked automatically by the framework, so you never should 
+   need to invoke it directly. All relevant states are available as properties e.g. 
+   the property Visible in derived classes reflects the visible state of the view. */
+void CoreView_ChangeViewState( CoreView _this, XSet aSetState, XSet aClearState );
+
+/* Wrapper function for the virtual method : 'Core::View.ChangeViewState()' */
+void CoreView__ChangeViewState( void* _this, XSet aSetState, XSet aClearState );
+
+#ifdef __cplusplus
+  }
+#endif
+
+#endif /* _CoreView_H */
+
+/* Embedded Wizard */

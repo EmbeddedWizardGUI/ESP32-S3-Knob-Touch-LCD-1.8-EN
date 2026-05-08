@@ -1,0 +1,137 @@
+﻿$version 15.02
+
+// This unit is a part of the Embedded Wizard framework 'Mosaic'
+$rect <40,70,240,110>
+unit Core
+{
+  attr Directory = $Mosaic;
+}
+
+// This unit is a part of the Embedded Wizard framework 'Mosaic'
+$rect <40,110,240,150>
+unit Resources
+{
+  attr Directory = $Mosaic;
+}
+
+// This unit is a part of the Embedded Wizard framework 'Mosaic'
+$rect <40,150,240,190>
+unit Graphics
+{
+  attr Directory = $Mosaic;
+}
+
+// This unit is a part of the Embedded Wizard framework 'Mosaic'
+$rect <40,190,240,230>
+unit Effects
+{
+  attr Directory = $Mosaic;
+}
+
+// This unit is a part of the Embedded Wizard framework 'Mosaic'
+$rect <40,230,240,270>
+unit Views
+{
+  attr Directory = $Mosaic;
+}
+
+// This unit is a part of the Embedded Wizard framework 'Mosaic'
+$rect <40,270,240,310>
+unit WidgetSet
+{
+  attr Directory = $Mosaic\;
+}
+
+// The 'default' Language. Each project has to contain at least one language brick \
+// called 'Default'
+$rect <290,70,490,110>
+language Default;
+
+// ExternVideo extension providing video playback support
+$rect <40,420,240,460>
+unit ExternVideo
+{
+  attr Directory = ..\..\..\Extensions\ExternVideo\;
+}
+
+// The unit of the application class
+$rect <40,380,240,420>
+unit Application
+{
+  attr Directory = .\;
+}
+
+// Mosaic Framework
+note group Note1
+{
+  attr Bounds = <20,20,260,330>;
+}
+
+// Profile Configuration
+note group Note2
+{
+  attr Bounds = <520,20,760,130>;
+}
+
+// Languages
+note group Note3
+{
+  attr Bounds = <270,20,510,130>;
+}
+
+// Project Units
+note group Note5
+{
+  attr Bounds = <20,340,260,480>;
+}
+
+// This is a profile member for the project. This profile controls the code generation \
+// for the target system.
+$rect <540,70,740,110>
+profile ESP32 : Espressif.ESP32.RGB565
+{
+  attr ScreenSize = <360,360>;
+  attr Optimization = High;
+  attr ApplicationClass = Application::Application;
+  attr ScreenOrientation = Normal;
+  attr ModeOfBitmapResources = DirectAccess;
+  attr ModeOfStringConstants = DirectAccess;
+  attr OutputDirectory = ..\..\..\Application\GeneratedCode;
+  attr CleanOutputDirectories = true;
+  attr Verbose = false;
+  attr FontConversion = Windows;
+  attr OutputFileNameExtension = c;
+  attr StorageOfResources = Code;
+  attr StorageOfConstants = Code;
+
+  $rect <10,10,210,50>
+  macro Author = "Dipl. Ing. Paul Banach and Dipl. Ing. Manfred Schweyer, Copyright (C) TARA Systems GmbH";
+
+  $rect <10,50,210,90>
+  macro UseSnapAnimation = true;
+
+  $rect <10,90,210,130>
+  macro PrototyperMediaPath = "file://..\\..\\..\\Extensions\\ExternVideo\\Media\\";
+}
+
+// The sample application 'Standmixer' implements a user interface for a stand mixer \
+// appliance. The user can switch between six blending modes (Chop, Crush, Whip, \
+// Shake, Stir, Strain) using a rotary icon carousel and set a countdown timer for \
+// the blending operation. A dedicated focus of this demo application lies on the \
+// usage of video playback and circular path animations. The countdown progress is \
+// visualized using an arc path object, while MJPEG videos are played from LittleFS \
+// during the blending operation.
+// 
+// This demo application comes in the native resolution of 360x360 and is designed \
+// for a round display.
+// 
+// You can double-click on the 'Standmixer' brick to open the unit within the Composer \
+// and to analyze the implementation.
+// 
+// To start the application within the Prototyper, press 'Ctrl'+'F5'.
+// 
+// For more information, please visit: https://doc.embedded-wizard.de/
+note legend Note6
+{
+  attr Bounds = <270,140,760,480>;
+}

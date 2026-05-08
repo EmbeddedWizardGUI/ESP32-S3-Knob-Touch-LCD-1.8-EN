@@ -1,0 +1,192 @@
+﻿$version 15.00
+
+// This unit is a part of the Embedded Wizard framework 'Mosaic'
+$rect <40,70,240,110>
+unit Core
+{
+  attr Directory = $Mosaic;
+}
+
+// This unit is a part of the Embedded Wizard framework 'Mosaic'
+$rect <40,110,240,150>
+unit Resources
+{
+  attr Directory = $Mosaic;
+}
+
+// This unit is a part of the Embedded Wizard framework 'Mosaic'
+$rect <40,150,240,190>
+unit Graphics
+{
+  attr Directory = $Mosaic;
+}
+
+// This unit is a part of the Embedded Wizard framework 'Mosaic'
+$rect <40,190,240,230>
+unit Effects
+{
+  attr Directory = $Mosaic;
+}
+
+// This unit is a part of the Embedded Wizard framework 'Mosaic'
+$rect <40,230,240,270>
+unit Views
+{
+  attr Directory = $Mosaic;
+}
+
+// This unit is a part of the Embedded Wizard framework 'Mosaic'
+$rect <40,270,240,310>
+unit WidgetSet
+{
+  attr Directory = $Mosaic\;
+}
+
+// The 'default' Language. Each project has to contain at least one language brick \
+// called 'Default'
+$rect <540,70,740,110>
+language Default;
+
+// The unit of the application class
+$rect <540,270,740,310>
+unit Application
+{
+  attr Directory = .\;
+}
+
+// Mosaic Framework
+note group Note1
+{
+  attr Bounds = <20,20,260,330>;
+}
+
+// Profile Configuration
+note group Note2
+{
+  attr Bounds = <270,20,510,330>;
+}
+
+// Languages
+note group Note3
+{
+  attr Bounds = <520,20,760,170>;
+}
+
+// Implementation of the ScreenOrientation example
+note group Note5
+{
+  attr Bounds = <520,180,760,330>;
+}
+
+// Welcome to the example 'ScreenOrientation'!
+// 
+// The intention of this project is to show the possibility to create a GUI application \
+// that is independent from the physical layout of the LCD.
+// 
+// This means, you can create a GUI application in portrait mode for a target that \
+// is connected with a LCD in landscape mode (or the other way). Or you can run your \
+// GUI application using a display that is mounted with a rotation by 180 degrees.
+// The Code Generator of Embedded Wizard and the Graphics Engine running on the target \
+// will take care, that everything appears in the proper orientation.
+// 
+// Within the Profile settings of a project you can choose one of the following ScreenOrientations:
+// Normal, Rotated_90, Rotated_180 or Rotated_270
+// 
+// To generate code for the target, select the desired profile within the drop-down \
+// box and press 'F8'.
+note legend Note4
+{
+  attr Bounds = <20,340,760,650>;
+}
+
+// This is a profile member for the project. This profile controls the code generation \
+// for the target system.
+$rect <290,70,490,110>
+profile ESP32_0 : Espressif.ESP32.RGB565
+{
+  attr ScreenSize = <360,360>;
+  attr Optimization = High;
+  attr ApplicationClass = Application::Application;
+  attr ScreenOrientation = Normal;
+  attr ModeOfBitmapResources = DirectAccess;
+  attr ModeOfStringConstants = DirectAccess;
+  attr OutputDirectory = ..\..\..\Application\GeneratedCode;
+  attr CleanOutputDirectories = false;
+  attr Verbose = false;
+  attr FontConversion = Windows;
+  attr OutputFileNameExtension = c;
+  attr StorageOfResources = Code;
+  attr StorageOfConstants = Code;
+
+  $rect <10,10,154,50>
+  macro Author = "Dipl. Ing. Paul Banach and Dipl. Ing. Manfred Schweyer, Copyright (C) TARA Systems GmbH";
+}
+
+// This is a profile member for the project. This profile controls the code generation \
+// for the target system.
+$rect <290,110,490,150>
+profile ESP32_90 : Espressif.ESP32.RGB565
+{
+  attr ScreenSize = <360,360>;
+  attr Optimization = High;
+  attr ApplicationClass = Application::Application;
+  attr ScreenOrientation = Rotated_90;
+  attr ModeOfBitmapResources = DirectAccess;
+  attr ModeOfStringConstants = DirectAccess;
+  attr OutputDirectory = ..\..\..\Application\GeneratedCode;
+  attr CleanOutputDirectories = false;
+  attr Verbose = false;
+  attr FontConversion = Windows;
+  attr OutputFileNameExtension = c;
+  attr StorageOfResources = Code;
+  attr StorageOfConstants = Code;
+
+  $rect <10,10,154,50>
+  macro Author = "Dipl. Ing. Paul Banach and Dipl. Ing. Manfred Schweyer, Copyright (C) TARA Systems GmbH";
+}
+
+// This is a profile member for the project. This profile controls the code generation \
+// for the target system.
+$rect <290,150,490,190>
+profile ESP32_180 : Espressif.ESP32.RGB565
+{
+  attr ScreenSize = <360,360>;
+  attr Optimization = High;
+  attr ApplicationClass = Application::Application;
+  attr ScreenOrientation = Rotated_180;
+  attr ModeOfBitmapResources = DirectAccess;
+  attr ModeOfStringConstants = DirectAccess;
+  attr OutputDirectory = ..\..\..\Application\GeneratedCode;
+  attr CleanOutputDirectories = false;
+  attr Verbose = false;
+  attr FontConversion = Windows;
+  attr OutputFileNameExtension = c;
+  attr StorageOfResources = Code;
+  attr StorageOfConstants = Code;
+
+  $rect <10,10,154,50>
+  macro Author = "Dipl. Ing. Paul Banach and Dipl. Ing. Manfred Schweyer, Copyright (C) TARA Systems GmbH";
+}
+
+// This is a profile member for the project. This profile controls the code generation \
+// for the target system.
+$rect <290,190,490,230>
+profile ESP32_270 : Espressif.ESP32.RGB565
+{
+  attr ScreenSize = <360,360>;
+  attr Optimization = High;
+  attr ApplicationClass = Application::Application;
+  attr ScreenOrientation = Rotated_270;
+  attr ModeOfBitmapResources = DirectAccess;
+  attr ModeOfStringConstants = DirectAccess;
+  attr OutputDirectory = ..\..\..\Application\GeneratedCode;
+  attr CleanOutputDirectories = false;
+  attr Verbose = false;
+  attr FontConversion = Windows;
+  attr OutputFileNameExtension = c;
+  attr StorageOfResources = Code;
+  attr StorageOfConstants = Code;
+
+  $rect <10,10,154,50>
+  macro Author = "Dipl. Ing. Paul Banach and Dipl. Ing. Manfred Schweyer, Copyright (C) TARA Systems GmbH";
+}

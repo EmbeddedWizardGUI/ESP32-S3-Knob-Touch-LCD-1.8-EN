@@ -1,0 +1,732 @@
+﻿$version 15.01
+
+// The class ExternVideo::Bitmap provides the functionality to represent bitmaps \
+// loaded at the runtime from an extern video provider.
+// 
+// Bitmaps loaded in this manner can be used as regular bitmap resources -> they \
+// can be shown in all adequate views like Views::Image, Views::Wallpaper, Views::Frame, \
+// Views::WarpImage and Views::AttrText.
+// 
+// To specify the file or URI to load, the class ExternVideo::Bitmap implements the \
+// property 'Source'. With the property 'Paused', the playback of a video can be \
+// controlled.
+// 
+// The properties 'OnError' and 'OnEndOfStream' permit the owner of the bitmap object \
+// to conect slot methods which will be signaled when decoding is finished or an \
+// error is encountered.
+note legend Note
+{
+  attr Bounds = <10,160,910,360>;
+}
+
+$rect <650,20,850,60>
+inline Inline
+{
+  $if $platform != *.WebGL.*
+    #include "EwExternVideo.h"
+  $endif
+}
+
+// The class ExternVideo::Bitmap provides the functionality to represent bitmaps \
+// loaded at the runtime from an extern ExternVideo pipeline. Bitmaps loaded in this \
+// manner can be used as regular bitmap resources -> they can be shown in all adequate \
+// views like Views::Image, Views::Wallpaper, Views::Frame, Views::WarpImage and \
+// Views::AttrText.
+// To specify the file or URI to load by ExternVideo, the class implements the property \
+// @Source. With the property @Paused, the playback of a video can be controlled. \
+// The properties @OnError and @OnEndOfStream permit the owner of the bitmap object \
+// to conect slot methods which will be signaled when decoding is finished or an \
+// error is encountered.
+$rect <10,20,210,60>
+$output false
+class Bitmap : Resources::Bitmap
+{
+  $rect <30,430,228,470>
+  inherited method Done()
+  {
+    // There is no associated ExternVideo instance.
+    if ( !instance )
+      return;
+
+    Destroy();
+
+    // From now, there is no associated ExternVideo instance anymore.
+    instance = null;
+  }
+
+  $rect <30,390,230,430>
+  inherited method Init()
+  {
+    $if $composer
+
+      dummyBitmap     = ExternVideo::IconSmall;
+      bitmap          = dummyBitmap.bitmap;
+      pure FrameSize  = dummyBitmap.FrameSize;
+      pure FrameDelay = dummyBitmap.FrameDelay;
+      pure NoOfFrames = dummyBitmap.NoOfFrames;
+
+    $else
+
+      // The ExternVideo bitmap content can change at the runtime. It is 'mutable'.
+      Mutable = true;
+
+    $endif
+  }
+
+  // Getter/Setter
+  note group Note4
+  {
+    attr Bounds = <480,290,940,640>;
+  }
+
+  // Properties
+  note group Note3
+  {
+    attr Bounds = <20,10,940,280>;
+  }
+
+  // Progress
+  note group Note2
+  {
+    attr Bounds = <250,290,470,640>;
+  }
+
+  // Initialization
+  note group Note1
+  {
+    attr Bounds = <20,290,240,640>;
+  }
+
+  $rect <30,470,230,510>
+  var handle instance;
+
+  $rect <260,330,460,370>
+  slot onUpdate
+  {
+    // There is no ExternVideo instance associated with the resource object
+    if ( !instance )
+      return;
+
+    // Get the latest player state
+    var ExternVideo::State state = GetState();
+
+    // Notify the owner about the state alternation.
+    switch ( state )
+    {
+      case ExternVideo::State.Paused:
+      {
+        if ( !Paused )
+          Resume();
+        else
+          UpdateTimer.Enabled = false;
+      }
+
+      case ExternVideo::State.EndOfStreamReached:
+      {
+        UpdateTimer.Enabled = false;
+        postsignal OnEndOfStream;
+      }
+
+      case ExternVideo::State.Error:
+      {
+        UpdateTimer.Enabled = false;
+        postsignal OnError;
+      }
+
+      default:
+        ;
+    }
+
+
+    // get latest bitmap frame from the ExternVideo.
+    var handle newBitmap = GetNewBitmap();
+
+    if ( newBitmap )
+    {
+      // Copy the bitmap attributes into this resource object.
+      bitmap = newBitmap;
+
+      if ( ! FirstFrameReceived )
+      {
+         FirstFrameReceived = true;
+         signal OnFirstFrame;
+      }
+
+      signal OnNewPosition;
+
+      // Notify all associated views to update their appearance.
+      notifyobservers this;
+    }
+  }
+
+  $rect <30,330,230,370>
+  slot onNewSource
+  {
+    $if !$composer
+
+    // Release the old instance, if any.
+    if ( instance )
+      Destroy();
+
+    /* clear old content */
+    notifyobservers this;
+    instance = null;
+
+    // Create new instance, if any source has been specified.
+    if ( Source )
+      instance = Create();
+
+    if ( instance )
+      UpdateTimer.Enabled = true;
+    else if ( Source )
+      postsignal OnError;
+
+    FirstFrameReceived = false;
+
+    // From now, instance is the associated ExternVideo instance.
+
+    $endif
+  }
+
+  $rect <260,90,460,130>
+  onset Paused
+  {
+    // The value doesn't change - nothing to do.
+    if ( pure Paused == value )
+      return;
+
+    // Remember the property's new value.
+    pure Paused = value;
+
+    // No associated ExternVideo instance.
+    if ( !instance )
+      return;
+
+    var bool   isPaused    = value;
+
+    if (  isPaused ) Pause ();
+    if ( !isPaused ) Resume();
+
+  }
+
+  $rect <30,90,230,130>
+  onset Source
+  {
+    // The value doesn't change - nothing to do.
+    //if ( pure Source == value )
+    //  return;
+
+    // Remember the property's new value.
+    pure Source = value;
+
+    // reset paused state
+    pure Paused = false;
+
+    // Now handle the alternation of the property.
+    postsignal onNewSource;
+  }
+
+  // The property 'OnError' can refer to a slot method, which will be signaled when \
+  // the decoding is failed.
+  $rect <710,220,910,260>
+  property slot OnError;
+
+  // The property 'OnEndOfStream' can refer to a slot method, which will be signaled \
+  // when the decoding is finished.
+  $rect <710,180,910,220>
+  property slot OnEndOfStream;
+
+  // The property 'Paused' determines whether the playback is paused or not.
+  $rect <260,50,460,90>
+  property bool Paused = false;
+
+  // The property 'Source' specifies the URI to open and decode by the ExternVideo.
+  $rect <30,50,230,90>
+  property string Source = "";
+
+  $rect <30,540,230,580>
+  method handle Create()
+  {
+    $if !$prototyper && ( $platform != *.WebGL.* )
+      var string newSource  = Source;
+      var handle theInstance;
+
+      native ( theInstance, newSource )
+      {
+        theInstance = EwExternVideoCreate( newSource );
+      }
+
+      return theInstance;
+
+    $elseif $prototyper && !$composer
+
+      return EwExternVideoCreate( Source );
+
+    $else
+
+      return null;
+
+    $endif
+
+  }
+
+  $rect <30,580,230,620>
+  method void Destroy()
+  {
+    $if !$prototyper && ( $platform != *.WebGL.* )
+      var handle theInstance = instance;
+
+      native ( theInstance )
+      {
+        EwExternVideoDestroy( theInstance );
+      }
+
+    $elseif $prototyper && !$composer
+
+      EwExternVideoDestroy( instance );
+
+    $endif
+
+    bitmap = null;
+    pure FrameSize = <0,0>;
+  }
+
+  $rect <260,540,460,580>
+  method void Resume()
+  {
+    $if !$prototyper && ( $platform != *.WebGL.* )
+      var handle theInstance = instance;
+
+      native ( theInstance )
+      {
+        EwExternVideoResume( theInstance );
+      }
+
+    $elseif $prototyper && !$composer
+
+      EwExternVideoResume( instance );
+
+    $endif
+
+    UpdateTimer.Enabled = true;
+  }
+
+  $rect <260,580,460,620>
+  method void Pause()
+  {
+    $if !$prototyper && ( $platform != *.WebGL.* )
+      var handle theInstance = instance;
+
+      native ( theInstance )
+      {
+        EwExternVideoPause( theInstance );
+      }
+
+    $elseif $prototyper && !$composer
+
+      EwExternVideoPause( instance );
+
+    $endif
+
+  }
+
+  $rect <490,330,690,370>
+  method ExternVideo::State GetState()
+  {
+    var ExternVideo::State  playerState = ExternVideo::State.Undefined;
+
+    $if !$prototyper && ( $platform != *.WebGL.* )
+      var handle theInstance = instance;
+
+      native ( theInstance, playerState )
+      {
+        int state = EwExternVideoGetState( theInstance );
+        switch ( state )
+        {
+          case EW_EXTERN_VIDEO_STATE_BUFFERING:
+            playerState = ExternVideoStateBuffering;
+            break;
+          case EW_EXTERN_VIDEO_STATE_READY:
+            playerState = ExternVideoStateReady;
+            break;
+          case EW_EXTERN_VIDEO_STATE_RESUMING:
+            playerState = ExternVideoStateResuming;
+            break;
+          case EW_EXTERN_VIDEO_STATE_PLAYING:
+            playerState = ExternVideoStatePlaying;
+            break;
+          case EW_EXTERN_VIDEO_STATE_PAUSED:
+            playerState = ExternVideoStatePaused;
+            break;
+          case EW_EXTERN_VIDEO_STATE_END_OF_STREAM:
+            playerState = ExternVideoStateEndOfStreamReached;
+            break;
+          case EW_EXTERN_VIDEO_STATE_ERROR:
+            playerState = ExternVideoStateError;
+            break;
+          default: playerState = ExternVideoStateUndefined;
+        }
+
+
+      }
+
+    $elseif $prototyper && !$composer
+
+      var int32 state = EwExternVideoGetState( instance );
+
+      switch ( state )
+      {
+        case 1:
+          playerState = ExternVideo::State.Buffering;
+        case 2:
+          playerState = ExternVideo::State.Ready;
+        case 3:
+          playerState = ExternVideo::State.Resuming;
+        case 4:
+          playerState = ExternVideo::State.Playing;
+        case 5:
+          playerState = ExternVideo::State.Paused;
+        case 6:
+          playerState = ExternVideo::State.EndOfStreamReached;
+        case 7:
+          playerState = ExternVideo::State.Error;
+        default:
+          playerState = ExternVideo::State.Undefined;
+      }
+
+    $endif
+
+    if ( playerState != PlayerState )
+    {
+      //trace "playerState changed from ", PlayerState, " to ", playerState;
+      PlayerState = playerState;
+    }
+
+    return playerState;
+
+  }
+
+  $rect <490,370,690,410>
+  method handle GetNewBitmap()
+  {
+    var handle  theBitmap = null;
+    var point   theFrameSize = <0,0>;
+
+    $if !$prototyper && ( $platform != *.WebGL.* )
+      var handle theInstance = instance;
+
+      native ( theInstance, theBitmap, theFrameSize)
+      {
+        XBitmap* bmp = EwExternVideoGetNewBitmap( theInstance );
+
+        if ( bmp )
+          theFrameSize = bmp->FrameSize;
+
+        theBitmap = (XHandle)(void*)bmp;
+      }
+
+    $elseif $prototyper && !$composer
+
+      theBitmap    = EwExternVideoGetNewBitmap( instance );
+      theFrameSize = EwGetBitmapFrameSize ( theBitmap );
+
+    $endif
+
+    if ( theBitmap )
+      pure FrameSize = theFrameSize;
+
+    return theBitmap;
+
+  }
+
+  $rect <260,390,460,430>
+  object Core::Timer UpdateTimer
+  {
+    preset OnTrigger = onUpdate;
+    preset Period = 5;
+  }
+
+  $rect <710,330,910,370>
+  method int32 GetPosition()
+  {
+    var int32 thePosition = 0;
+
+    $if !$prototyper && ( $platform != *.WebGL.* )
+      var handle theInstance = instance;
+
+
+      native ( theInstance, thePosition )
+      {
+        thePosition = EwExternVideoGetPosition( theInstance );
+      }
+
+    $elseif $prototyper && !$composer
+
+      thePosition = EwExternVideoGetPosition( instance );
+
+    $endif
+
+    return thePosition;
+  }
+
+  $rect <710,370,910,410>
+  method void SetPosition( arg int32 aPosition )
+  {
+    $if !$prototyper && ( $platform != *.WebGL.* )
+      var handle theInstance = instance;
+      var int32  thePosition = aPosition;
+
+      native ( theInstance, thePosition )
+      {
+        EwExternVideoSetPosition( theInstance, thePosition );
+      }
+
+    $elseif $prototyper && !$composer
+
+      EwExternVideoSetPosition( instance, aPosition );
+
+    $endif
+
+    UpdateTimer.Enabled = true;
+  }
+
+  $rect <710,420,910,460>
+  method int32 GetDuration()
+  {
+    var int32 theDuration = 0;
+
+    $if !$prototyper && ( $platform != *.WebGL.* )
+      var handle theInstance = instance;
+
+      native ( theInstance, theDuration )
+      {
+        theDuration = EwExternVideoGetDuration( theInstance );
+      }
+
+    $elseif $prototyper && !$composer
+
+      theDuration = EwExternVideoGetDuration( instance );
+
+    $endif
+
+    return theDuration;
+  }
+
+  $rect <710,460,910,500>
+  method void SetDuration( arg int32 aDuration )
+  {
+    $if !$prototyper && ( $platform != *.WebGL.* )
+      var handle theInstance = instance;
+      var int32  theDuration = aDuration;
+
+      native ( theInstance, theDuration )
+      {
+        EwExternVideoSetDuration( theInstance, theDuration );
+      }
+
+    $elseif $prototyper && !$composer
+
+      EwExternVideoSetDuration( instance, aDuration );
+
+    $endif
+
+  }
+
+  $rect <710,510,910,550>
+  method int32 GetSpeed()
+  {
+    var int32 theSpeed = 0;
+
+    $if !$prototyper && ( $platform != *.WebGL.* )
+      var handle theInstance = instance;
+
+      native ( theInstance, theSpeed )
+      {
+        theSpeed = EwExternVideoGetSpeed( theInstance );
+      }
+
+    $elseif $prototyper && !$composer
+
+      theSpeed = EwExternVideoGetSpeed( instance );
+
+    $endif
+
+    return theSpeed;
+  }
+
+  $rect <710,550,910,590>
+  method void SetSpeed( arg int32 aSpeed )
+  {
+    $if !$prototyper && ( $platform != *.WebGL.* )
+      var handle theInstance = instance;
+      var int32  theSpeed = aSpeed;
+
+      native ( theInstance, theSpeed )
+      {
+        EwExternVideoSetSpeed( theInstance, theSpeed );
+      }
+
+    $elseif $prototyper && !$composer
+
+      EwExternVideoSetSpeed( instance, aSpeed );
+
+    $endif
+
+  }
+
+  $rect <30,140,230,180>
+  property int32 Position;
+
+  $rect <30,180,230,220>
+  onset Position
+  {
+    // The value doesn't change - nothing to do.
+    if ( pure Position == value )
+      return;
+
+    // Remember the property's new value.
+    pure Position = value;
+
+    SetPosition( value );
+  }
+
+  $rect <30,220,230,260>
+  onget Position
+  {
+    pure Position = GetPosition();
+
+    return pure Position;
+  }
+
+  $rect <260,140,460,180>
+  property int32 Duration;
+
+  $rect <260,180,460,220>
+  onset Duration
+  {
+    // The value doesn't change - nothing to do.
+    if ( pure Duration == value )
+      return;
+
+    // Remember the property's new value.
+    pure Duration = value;
+
+    SetDuration( value );
+  }
+
+  $rect <260,220,460,260>
+  onget Duration
+  {
+    pure Duration = GetDuration();
+
+    return pure Duration;
+  }
+
+  $rect <490,140,690,180>
+  property int32 Speed = 100;
+
+  $rect <490,180,690,220>
+  onset Speed
+  {
+    // The value doesn't change - nothing to do.
+    if ( pure Speed == value )
+      return;
+
+    // Remember the property's new value.
+    pure Speed = value;
+
+    SetSpeed( value );
+  }
+
+  $rect <490,220,690,260>
+  onget Speed
+  {
+    pure Speed = GetSpeed();
+
+    return pure Speed;
+  }
+
+  $rect <710,50,910,90>
+  property slot OnFirstFrame;
+
+  $rect <260,470,460,510>
+  var bool FirstFrameReceived = false;
+
+  // The property 'OnError' can refer to a slot method, which will be signaled when \
+  // the decoding is failed.
+  $rect <710,90,910,130>
+  property slot OnNewPosition;
+
+  $rect <260,430,460,470>
+  var Resources::Bitmap dummyBitmap;
+
+  // The property 'OnEndOfStream' can refer to a slot method, which will be signaled \
+  // when the decoding is finished.
+  $rect <710,140,910,180>
+  property ExternVideo::State PlayerState = ExternVideo::State.Undefined;
+
+  $rect <490,420,690,460>
+  method string GetErrorMessage()
+  {
+    var string errorMessage = "";
+
+    $if !$prototyper && ( $platform != *.WebGL.* )
+      var handle theInstance = instance;
+
+      native ( theInstance, errorMessage )
+      {
+        errorMessage = EwExternVideoGetErrorMessage( theInstance );
+      }
+
+    $elseif $prototyper && !$composer
+
+      errorMessage = EwExternVideoGetErrorMessage( instance );
+
+    $endif
+
+    return errorMessage;
+
+  }
+}
+
+// The differnt player states.
+$rect <220,20,420,60>
+$output false
+enum State
+{
+  $rect <10,10,210,50>
+  item Undefined;
+
+  $rect <10,50,210,90>
+  item Buffering;
+
+  $rect <10,90,210,130>
+  item Ready;
+
+  $rect <10,130,210,170>
+  item Resuming;
+
+  $rect <10,170,210,210>
+  item Playing;
+
+  $rect <10,210,210,250>
+  item Paused;
+
+  $rect <10,250,210,290>
+  item EndOfStreamReached;
+
+  $rect <10,290,210,330>
+  item Error;
+}
+
+$rect <430,20,630,60>
+$output false
+resource Resources::Bitmap IconSmall
+{
+  attr bitmapfile FileName = .\FilmSmall.png;
+  attr bitmapformat Format = Native;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapdithering Dithering = Auto;
+  attr bitmapmode Mode = Default;
+}

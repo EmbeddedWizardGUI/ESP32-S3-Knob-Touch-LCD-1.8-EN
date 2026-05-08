@@ -1,0 +1,48 @@
+# ESP-IDF build output
+build/
+sdkconfig.old
+sdkconfig.defaults.old
+
+# Component manager (downloaded automatically via dependencies.lock / idf_component.yml)
+managed_components/
+
+# Firmware images at project root
+# (filesystem .bins like littlefs.bin / spiffs.bin are intentionally tracked,
+#  so a fresh clone can flash without first running littlefs_gen.py)
+*.uf2
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+WORKSPACE.code-workspace
+
+# Embedded Wizard Studio user-specific / regenerated files
+*.ewu.bak
+*.ews
+Chats/
+# Build report contains absolute paths from the generator host
+build_report.*
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# Logs / temp
+*.log
+*.tmp
+*~
+
+# README banner image staging area (uploaded to FTP, not stored in git)
+Screenshots/

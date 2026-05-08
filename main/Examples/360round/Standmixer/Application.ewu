@@ -1,0 +1,2402 @@
+﻿$version 15.02
+
+// Include the device driver header file to access the device class
+$rect <260,289,460,329>
+inline Inline
+{
+  #include "DeviceDriver.h"
+}
+
+// State machine phases for the timer workflow
+$rect <10,380,210,420>
+enum TimerStateEnum
+{
+  $rect <20,10,220,50>
+  item Idle;
+
+  $rect <20,50,220,90>
+  item Setting;
+
+  $rect <20,90,220,130>
+  item Running;
+
+  $rect <20,130,220,170>
+  item Done;
+}
+
+// Root component of the Standmixer GUI application. For more information, please \
+// visit: https://doc.embedded-wizard.de/
+$rect <10,-100,210,-60>
+$output false
+class Application : Core::Root
+{
+  $rect <640,40,880,80>
+  inherited property Bounds = <0,0,360,360>;
+
+  $rect <400,40,640,80>
+  inherited method Init()
+  {
+    // Initialize video paths per mode
+    $if !$prototyper
+    VideoSources[0] = "flash://chop.avi";
+    VideoSources[1] = "flash://crush.avi";
+    VideoSources[2] = "flash://whip.avi";
+    VideoSources[3] = "flash://shake.avi";
+    VideoSources[4] = "flash://stir.avi";
+    VideoSources[5] = "flash://strain.avi";
+    $else
+    VideoSources[0] = "chop.avi";
+    VideoSources[1] = "crush.avi";
+    VideoSources[2] = "whip.avi";
+    VideoSources[3] = "shake.avi";
+    VideoSources[4] = "stir.avi";
+    VideoSources[5] = "strain.avi";
+    $endif
+
+    // Set initial background
+    Background.Bitmap = Backgrounds[0];
+    PreviousAdcValue = 0;
+
+    // Create control bar (always present)
+    CtrlBar = new Application::ControlBar;
+    CtrlBar.OnAction = OnControlBarAction;
+    CtrlBar.OnSelectionChanged = OnSelectionChanged;
+    CtrlBar.OnTouch = OnCarouselTouch;
+    Add( CtrlBar, 0 );
+
+    // Preload video: create decoder early (ESP32 requires first init during boot)
+    var string videoPath = VideoSources[0];
+
+    $if $prototyper || $composer
+    videoPath = "file://..\\..\\..\\Extensions\\ExternVideo\\Media\\" + videoPath;
+    $endif
+
+    VideoSource.Name = videoPath;
+    VideoSource.Paused = true;
+
+    /* add a round mask for composer to get an impression of a round display... */
+    $if $prototyper
+
+    RoundMaskView = new Views::Image;
+    RoundMaskView.Bitmap = Application::RoundMask;
+    RoundMaskView.Color = #000000C0;
+    RoundMaskView.Bounds = Bounds.orect;
+    Add( RoundMaskView, 0 );
+
+    $endif
+  }
+
+  // Background image - full display
+  $rect <20,20,160,60>
+  object Views::Image Background
+  {
+    preset Bounds = <0,0,360,360>;
+    preset Bitmap = Application::BackgroundChop;
+  }
+
+  // Overlay for cross-fading to new background (fades in on top, then swapped)
+  $rect <160,20,300,60>
+  object Views::Image BackgroundNext
+  {
+    preset Bounds = <0,0,360,360>;
+    preset Visible = false;
+  }
+
+  // Opacity fade effect for BackgroundNext (0 → 255 cross-fade)
+  $rect <400,388,640,428>
+  object Effects::Int32Effect BgFadeEffect
+  {
+    preset OnFinished = OnBgFadeDone;
+    preset Timing = Effects::Timing.FastIn_EaseOut;
+    preset NoOfCycles = 1;
+    preset CycleDuration = 300;
+    preset Enabled = false;
+    preset Outlet = ^BackgroundNext.Opacity;
+  }
+
+  // Fade complete - copy new bitmap to Background and hide the overlay
+  $rect <640,388,880,428>
+  slot OnBgFadeDone
+  {
+    Background.Bitmap = BackgroundNext.Bitmap;
+    BackgroundNext.Visible = false;
+  }
+
+  // Video source for countdown playback (preloaded in Init)
+  $rect <929,449,1169,489>
+  object Resources::ExternVideo VideoSource
+  {
+    preset OnChangeState = OnVideoStateChanged;
+    preset Speed = 100;
+  }
+
+  // Video display view - shown during countdown behind the overlay
+  $rect <20,20,160,60>
+  object Views::Image VideoView
+  {
+    preset Bounds = <0,0,360,360>;
+    preset Color = #FFFFFFFF;
+    preset Alignment = Views::ImageAlignment[AlignHorzCenter, AlignVertCenter, ScaleToFit];
+    preset Bitmap = VideoSource;
+    preset AlphaBlended = false;
+    preset Visible = false;
+  }
+
+  // Video file paths per mode (6 entries, configurable per mode)
+  $rect <400,128,640,168>
+  array string VideoSources[ 6 ];
+
+  // Timer display component (MM:SS text for time selection) - created dynamically
+  $rect <640,290,880,330>
+  var Application::TimerConfigure TimerCfg = null;
+
+  // Done screen component ("Ready" / "Enjoy your meal!") - created dynamically
+  $rect <640,250,880,290>
+  var Application::DoneMessage DoneMsg = null;
+
+  // Control bar component (circles, arrow, press animations) - created in Init
+  $rect <400,290,640,330>
+  var Application::ControlBar CtrlBar = null;
+
+  // Countdown progress arc indicator - created dynamically
+  $rect <400,250,640,290>
+  var Application::ProgressIndicator ProgressInd = null;
+
+  // Background bitmap references for the 6 modes
+  $rect <400,88,640,128>
+  array Resources::Bitmap Backgrounds[ 6 ] =
+  (
+    Default[0] = Application::BackgroundChop;
+    Default[1] = Application::BackgroundCrush;
+    Default[2] = Application::BackgroundWhip;
+    Default[3] = Application::BackgroundShake;
+    Default[4] = Application::BackgroundStir;
+    Default[5] = Application::BackgroundStrain;
+  );
+
+  // Dark background bitmap references for the 6 modes (used during time selection)
+  $rect <640,88,880,128>
+  array Resources::Bitmap DarkBackgrounds[ 6 ] =
+  (
+    Default[0] = Application::BackgroundChopDark;
+    Default[1] = Application::BackgroundCrushDark;
+    Default[2] = Application::BackgroundWhipDark;
+    Default[3] = Application::BackgroundShakeDark;
+    Default[4] = Application::BackgroundStirDark;
+    Default[5] = Application::BackgroundStrainDark;
+  );
+
+  // Variable to keep Device alive for the entire lifetime of the application
+  $rect <929,42,1169,82>
+  var Application::DeviceClass DeviceRef = Application::Device;
+
+  // Previous ADC value for detecting encoder rotation direction
+  $rect <929,91,1169,131>
+  var int32 PreviousAdcValue;
+
+  // Observer for encoder rotation via ADC value changes
+  $rect <929,140,1169,180>
+  object Core::PropertyObserver EncoderObserver
+  {
+    preset OnEvent = onEncoderChange;
+    preset Outlet = ^Application::Device.AdcValue;
+  }
+
+  // Encoder rotation handler - adjusts timer in SETTING state, rotates carousel \
+  // in IDLE
+  $rect <929,180,1169,220>
+  slot onEncoderChange
+  {
+    // Compute rotation direction from ADC delta
+    var int32 currentAdc = Application::Device.AdcValue;
+    var int32 delta = currentAdc - PreviousAdcValue;
+    PreviousAdcValue = currentAdc;
+
+    // Timer setting mode - redirect input to timer adjustment
+    if ( TimerState == Application::TimerStateEnum.Setting )
+    {
+      if ( delta > 0 )
+        TimerCfg.TimerSeconds = TimerCfg.TimerSeconds + 1;
+      else if ( delta < 0 )
+        TimerCfg.TimerSeconds = TimerCfg.TimerSeconds - 1;
+
+      if ( TimerCfg.TimerSeconds < 0 )
+        TimerCfg.TimerSeconds = 0;
+
+      if ( TimerCfg.TimerSeconds > 60 )
+        TimerCfg.TimerSeconds = 60;
+
+      ProgressInd.SetPreview( TimerCfg.TimerSeconds );
+      return;
+    }
+
+    // Running mode - adjust countdown time with knob
+    if ( TimerState == Application::TimerStateEnum.Running )
+    {
+      if ( delta > 0 )
+        ProgressInd.AdjustTime( 1 );
+      else if ( delta < 0 )
+        ProgressInd.AdjustTime( -1 );
+      return;
+    }
+
+    // Carousel rotation (RotateStep handles locked/animation checks)
+    if ( delta > 0 )
+      CtrlBar.RotateStep( -1 );
+    else if ( delta < 0 )
+      CtrlBar.RotateStep( 1 );
+  }
+
+  // System event handler for hardware button press
+  $rect <929,220,1169,260>
+  object Core::SystemEventHandler HardButtonHandler
+  {
+    preset OnEvent = onHardButtonEvent;
+    preset Event = Application::Device.HardButtonEvent;
+  }
+
+  // Timer for auto-releasing button visual after hardware press
+  $rect <929,300,1169,340>
+  object Core::Timer HardButtonTimer
+  {
+    preset OnTrigger = OnHardButtonTimerDone;
+    preset Period = 0;
+    preset Begin = 200;
+    preset Enabled = false;
+  }
+
+  // Hardware button pressed - show press animation and start 200ms auto-release \
+  // timer
+  $rect <929,260,1169,300>
+  slot onHardButtonEvent
+  {
+    CtrlBar.AnimateButton( #C0C0C0FF );
+
+    // Restart the auto-release timer (toggle off/on to reset)
+    HardButtonTimer.Enabled = false;
+    HardButtonTimer.Enabled = true;
+  }
+
+  // Auto-release timer fired - play release animation and execute arrow action
+  $rect <929,340,1169,380>
+  slot OnHardButtonTimerDone
+  {
+    // Stop the auto-release timer, restore button to white and trigger state machine
+    HardButtonTimer.Enabled = false;
+    CtrlBar.AnimateButton( #FFFFFFFF );
+    HandleArrowAction();
+  }
+
+  // Keyboard handlers to simulate encoder rotation in Prototyper mode
+  $rect <1220,131,1460,171>
+  object Core::KeyPressHandler KeyLeftHandler
+  {
+    preset OnPress = onKeyLeft;
+    preset Filter = Core::KeyCode.Left;
+    preset OnHold = onKeyLeftHold;
+  }
+
+  $rect <1220,171,1460,211>
+  object Core::KeyPressHandler KeyRightHandler
+  {
+    preset OnPress = onKeyRight;
+    preset Filter = Core::KeyCode.Right;
+    preset OnHold = onKeyRightHold;
+  }
+
+  $rect <1220,91,1460,131>
+  object Core::KeyPressHandler KeyEnterHandler
+  {
+    preset OnPress = onKeyEnter;
+    preset Filter = Core::KeyCode.Enter;
+  }
+
+  // Keyboard Enter key - simulates hardware button press using same auto-release \
+  // timer
+  $rect <1220,371,1460,411>
+  slot onKeyEnter
+  {
+    // Show press animation and start auto-release timer (same as hardware button)
+    CtrlBar.AnimateButton( #C0C0C0FF );
+    HardButtonTimer.Enabled = false;
+    HardButtonTimer.Enabled = true;
+  }
+
+  // Keyboard Left arrow - decreases timer in SETTING, rotates carousel otherwise
+  $rect <1220,211,1460,251>
+  slot onKeyLeft
+  {
+    // Timer setting mode - decrease timer by 1 second
+    if ( TimerState == Application::TimerStateEnum.Setting )
+    {
+      TimerCfg.TimerSeconds = TimerCfg.TimerSeconds - 1;
+
+      if ( TimerCfg.TimerSeconds < 0 )
+        TimerCfg.TimerSeconds = 0;
+
+      ProgressInd.SetPreview( TimerCfg.TimerSeconds );
+      return;
+    }
+
+    // Running mode - decrease countdown time
+    if ( TimerState == Application::TimerStateEnum.Running )
+    {
+      ProgressInd.AdjustTime( -1 );
+      return;
+    }
+
+    // Carousel rotation (RotateStep handles locked/animation checks)
+    CtrlBar.RotateStep( -1 );
+  }
+
+  // Keyboard Right arrow - increases timer in SETTING, rotates carousel otherwise
+  $rect <1220,251,1460,291>
+  slot onKeyRight
+  {
+    // Timer setting mode - increase timer by 1 second
+    if ( TimerState == Application::TimerStateEnum.Setting )
+    {
+      TimerCfg.TimerSeconds = TimerCfg.TimerSeconds + 1;
+
+      if ( TimerCfg.TimerSeconds > 60 )
+        TimerCfg.TimerSeconds = 60;
+
+      ProgressInd.SetPreview( TimerCfg.TimerSeconds );
+      return;
+    }
+
+    // Running mode - increase countdown time
+    if ( TimerState == Application::TimerStateEnum.Running )
+    {
+      ProgressInd.AdjustTime( 1 );
+      return;
+    }
+
+    // Carousel rotation (RotateStep handles locked/animation checks)
+    CtrlBar.RotateStep( 1 );
+  }
+
+  // 200ms gate timer - hold events are ignored while this is running
+  $rect <1220,40,1460,80>
+  object Core::Timer KeyHoldGateTimer
+  {
+    preset Period = 0;
+    preset Begin = 200;
+    preset Enabled = false;
+  }
+
+  // Key held down - repeat 1s step with gate timer
+  $rect <1220,291,1460,331>
+  slot onKeyLeftHold
+  {
+    if ( TimerState == Application::TimerStateEnum.Running )
+    {
+      ProgressInd.AdjustTime( -1 );
+      return;
+    }
+
+    if ( TimerState != Application::TimerStateEnum.Setting )
+    {
+      // Continuous carousel rotation while key is held
+      CtrlBar.RotateStep( -1 );
+      return;
+    }
+
+    // Skip if last hold step was less than 200ms ago
+    if ( KeyHoldGateTimer.Enabled )
+      return;
+
+    KeyHoldGateTimer.Enabled = true;
+    TimerCfg.TimerSeconds = TimerCfg.TimerSeconds - 1;
+
+    if ( TimerCfg.TimerSeconds < 0 )
+      TimerCfg.TimerSeconds = 0;
+
+    ProgressInd.SetPreview( TimerCfg.TimerSeconds );
+  }
+
+  // Key held down - repeat 1s step with gate timer
+  $rect <1220,331,1460,371>
+  slot onKeyRightHold
+  {
+    if ( TimerState == Application::TimerStateEnum.Running )
+    {
+      ProgressInd.AdjustTime( 1 );
+      return;
+    }
+
+    if ( TimerState != Application::TimerStateEnum.Setting )
+    {
+      // Continuous carousel rotation while key is held
+      CtrlBar.RotateStep( 1 );
+      return;
+    }
+
+    // Skip if last hold step was less than 200ms ago
+    if ( KeyHoldGateTimer.Enabled )
+      return;
+
+    KeyHoldGateTimer.Enabled = true;
+    TimerCfg.TimerSeconds = TimerCfg.TimerSeconds + 1;
+
+    if ( TimerCfg.TimerSeconds > 60 )
+      TimerCfg.TimerSeconds = 60;
+
+    ProgressInd.SetPreview( TimerCfg.TimerSeconds );
+  }
+
+  // Current phase of the timer workflow
+  $rect <400,341,640,381>
+  var Application::TimerStateEnum TimerState = Application::TimerStateEnum.Idle;
+
+  // Round display mask (prototyper only, stays on top of z-order)
+  $rect <400,381,640,421>
+  var Views::Image RoundMaskView = null;
+
+  // Central state machine handler: Idle -> Setting -> Running -> Idle
+  $rect <400,640,640,680>
+  method void HandleArrowAction()
+  {
+    if ( TimerState == Application::TimerStateEnum.Idle )
+    {
+      // IDLE -> SETTING: Switch to dark background and show timer text
+      TimerState = Application::TimerStateEnum.Setting;
+      CtrlBar.Locked = true;
+      CtrlBar.RotateHandler.Enabled = false;
+      CtrlBar.ArrowBitmap = Application::IconPlayPause;
+      CtrlBar.ArrowButton.FrameNumber = 0;
+      CtrlBar.OuterGroup.Visible = false;
+      BgFadeEffect.Enabled = false;
+      BackgroundNext.Visible = false;
+      Background.Bitmap = DarkBackgrounds[CtrlBar.SelectedIndex];
+
+      // Create progress indicator in preview mode
+      ProgressInd = new Application::ProgressIndicator;
+      ProgressInd.OnCountdownDone = OnCountdownComplete;
+      ProgressInd.OnTick = OnProgressTick;
+      Add( ProgressInd, 0 );
+
+      // Create timer display with 5s default
+      TimerCfg = new Application::TimerConfigure;
+      TimerCfg.TimerSeconds = 5;
+      Add( TimerCfg, 0 );
+
+      // Show arc preview for default time
+      ProgressInd.SetPreview( 5 );
+
+      // Restack CtrlBar on top so its touch handlers always have highest priority
+      Remove( CtrlBar );
+      Add( CtrlBar, 0 );
+
+      // Restack round mask above everything (prototyper only)
+      $if $prototyper
+      if ( RoundMaskView != null )
+      {
+        Remove( RoundMaskView );
+        Add( RoundMaskView, 0 );
+      }
+      $endif
+    }
+    else if ( TimerState == Application::TimerStateEnum.Setting )
+    {
+      if ( TimerCfg.TimerSeconds > 0 )
+      {
+        // SETTING -> RUNNING: Start countdown
+        TimerState = Application::TimerStateEnum.Running;
+        CtrlBar.ArrowButton.FrameNumber = 1;
+
+        // Hide outer circle, selected fill and selected icon during countdown
+        CtrlBar.OuterGroup.Visible = false;
+        CtrlBar.Selected.Visible = false;
+        CtrlBar.IconSlot2.Visible = false;
+
+        // Start video playback
+        StartVideo();
+
+        // Start countdown on existing progress indicator
+        ProgressInd.StartCountdown( TimerCfg.TimerSeconds );
+      }
+      else
+      {
+        // No time set - return to IDLE
+        TimerState = Application::TimerStateEnum.Idle;
+        CtrlBar.Locked = false;
+        CtrlBar.RotateHandler.Enabled = true;
+        CtrlBar.ArrowBitmap = Application::IconArrow;
+        CtrlBar.ArrowButton.FrameNumber = 0;
+        CtrlBar.OuterGroup.Visible = true;
+        BgFadeEffect.Enabled = false;
+        BackgroundNext.Visible = false;
+        Background.Bitmap = Backgrounds[CtrlBar.SelectedIndex];
+
+        // Destroy progress indicator and timer display
+        if ( ProgressInd != null )
+        {
+          Remove( ProgressInd );
+          ProgressInd = null;
+        }
+        if ( TimerCfg != null )
+        {
+          Remove( TimerCfg );
+          TimerCfg = null;
+        }
+      }
+    }
+    else if ( TimerState == Application::TimerStateEnum.Running )
+    {
+      // RUNNING -> IDLE: Cancel countdown
+      StopVideo();
+      TimerState = Application::TimerStateEnum.Idle;
+      CtrlBar.Locked = false;
+      CtrlBar.RotateHandler.Enabled = true;
+      CtrlBar.ArrowBitmap = Application::IconArrow;
+      CtrlBar.ArrowButton.FrameNumber = 0;
+      BgFadeEffect.Enabled = false;
+      BackgroundNext.Visible = false;
+      Background.Bitmap = Backgrounds[CtrlBar.SelectedIndex];
+
+      // Restore outer circle, selected fill and icons
+      CtrlBar.OuterGroup.Visible = true;
+      CtrlBar.Selected.Visible = true;
+      CtrlBar.IconSlot2.Visible = true;
+
+      // Destroy progress indicator and timer display
+      if ( ProgressInd != null )
+      {
+        Remove( ProgressInd );
+        ProgressInd = null;
+      }
+      if ( TimerCfg != null )
+      {
+        Remove( TimerCfg );
+        TimerCfg = null;
+      }
+    }
+  }
+
+  // Control bar arrow button released - delegate to the state machine
+  $rect <640,600,880,640>
+  slot OnControlBarAction
+  {
+    HandleArrowAction();
+  }
+
+  // Countdown reached zero - tear down RUNNING state and show done screen
+  $rect <640,430,880,470>
+  slot OnCountdownComplete
+  {
+    StopVideo();
+    TimerState = Application::TimerStateEnum.Done;
+
+    // Tear down progress arc and timer display
+    if ( ProgressInd != null )
+    {
+      Remove( ProgressInd );
+      ProgressInd = null;
+    }
+    if ( TimerCfg != null )
+    {
+      Remove( TimerCfg );
+      TimerCfg = null;
+    }
+
+    // Hide the entire control bar so done message is unobstructed
+    CtrlBar.OuterGroup.Visible = false;
+    CtrlBar.InnerGroup.Visible = false;
+
+    // Create done message and wire up the auto-dismiss callback
+    DoneMsg = new Application::DoneMessage;
+    DoneMsg.OnExpired = OnDoneExpired;
+    DoneMsg.ModeIndex = CtrlBar.SelectedIndex;
+    Add( DoneMsg, 0 );
+
+  }
+
+  // Progress tick - syncs MM:SS display with remaining time once per second
+  $rect <400,429,640,469>
+  slot OnProgressTick
+  {
+    // Guard against queued signals arriving after cancellation
+    if ( ProgressInd == null )
+      return;
+
+    TimerCfg.TimerSeconds = ProgressInd.RemainingSeconds;
+  }
+
+  // Done message expired or dismissed - tear down done screen and restore IDLE state
+  $rect <400,470,640,510>
+  slot OnDoneExpired
+  {
+    // Remove the done screen from the view hierarchy
+    if ( DoneMsg != null )
+    {
+      Remove( DoneMsg );
+      DoneMsg = null;
+    }
+
+    // Return to IDLE - unlock carousel, restore arrow icon and background
+    TimerState = Application::TimerStateEnum.Idle;
+    CtrlBar.Locked = false;
+    CtrlBar.RotateHandler.Enabled = true;
+    CtrlBar.ArrowBitmap = Application::IconArrow;
+    CtrlBar.ArrowButton.FrameNumber = 0;
+    BgFadeEffect.Enabled = false;
+    BackgroundNext.Visible = false;
+    Background.Bitmap = Backgrounds[CtrlBar.SelectedIndex];
+
+    // Make the full control bar visible again
+    CtrlBar.OuterGroup.Visible = true;
+    CtrlBar.Selected.Visible = true;
+    CtrlBar.IconSlot2.Visible = true;
+    CtrlBar.InnerGroup.Visible = true;
+  }
+
+  // Carousel selection changed - cross-fade background to the newly selected mode
+  $rect <400,600,640,640>
+  slot OnSelectionChanged
+  {
+    // Determine the new background bitmap
+    var Resources::Bitmap newBmp;
+    if ( TimerState == Application::TimerStateEnum.Setting )
+      newBmp = DarkBackgrounds[CtrlBar.SelectedIndex];
+    else
+      newBmp = Backgrounds[CtrlBar.SelectedIndex];
+
+    // Skip fade if already showing the correct background
+    if ( newBmp == Background.Bitmap )
+      return;
+
+    // Set the new bitmap on the overlay, start the cross-fade
+    BackgroundNext.Bitmap = newBmp;
+    BackgroundNext.Opacity = 0;
+    BackgroundNext.Visible = true;
+    BgFadeEffect.Enabled = false;
+    BgFadeEffect.Value1 = 0;
+    BgFadeEffect.Value2 = 255;
+    BgFadeEffect.Enabled = true;
+  }
+
+  // Carousel touched - immediately dismiss done screen if showing
+  $rect <640,640,880,680>
+  slot OnCarouselTouch
+  {
+    // Touching the carousel during Done state dismisses the done screen
+    if ( TimerState == Application::TimerStateEnum.Done )
+      postsignal OnDoneExpired;
+  }
+
+  // Start video playback for the currently selected mode
+  $rect <929,489,1169,529>
+  method void StartVideo()
+  {
+    // Build the video path for the currently selected mode
+    var string source = VideoSources[CtrlBar.SelectedIndex];
+
+    // Prepend local file path prefix in Prototyper/Composer
+    $if $prototyper || $composer
+    source = "file://..\\..\\..\\Extensions\\ExternVideo\\Media\\" + source;
+    $endif
+
+    // Assign source, unpause playback and show the video view
+    VideoSource.Name = source;
+    VideoSource.Paused = false;
+    VideoView.Visible = true;
+  }
+
+  // Stop video playback and free decoder memory
+  $rect <929,529,1169,569>
+  method void StopVideo()
+  {
+    // Hide the video view and clear source to release decoder resources
+    VideoView.Visible = false;
+    VideoSource.Name = "";
+  }
+
+  // Handle video state changes - rewind to frame 0 on end-of-stream for looping
+  $rect <929,569,1169,609>
+  slot OnVideoStateChanged
+  {
+    var Resources::ExternVideo externVideo = (Resources::ExternVideo)sender;
+    var Resources::ExternVideoState state = externVideo.GetState();
+
+    switch ( state )
+    {
+      case Resources::ExternVideoState.EndOfStreamReached:
+      {
+        if ( TimerState == Application::TimerStateEnum.Running )
+        {
+          $if !$prototyper
+          // Seamless rewind to frame 0 via native call — no file reopen.
+          // Also re-enable the update timer and reset the stored state,
+          // because the Chora ExternVideo disables the timer on EOS.
+          native ( externVideo )
+          {
+            extern void EwExternVideoRewind( XHandle aInstance, int aFrameNumber );
+            XHandle inst = ((ResourcesExternVideo)externVideo)->instance;
+            if ( inst )
+            {
+              EwExternVideoRewind( inst, 0 );
+
+              /* Re-enable the 5ms update timer that was disabled on EOS */
+              CoreTimer_OnSetEnabled( &((ResourcesExternVideo)externVideo)->updateTimer, 1 );
+
+              /* Reset stored state so next onUpdate doesn't re-trigger EOS */
+              ((ResourcesExternVideo)externVideo)->state = ResourcesExternVideoStatePlaying;
+            }
+          }
+          $else
+          // Prototyper fallback: reload video via Name reassignment
+          postsignal OnVideoRestart;
+          $endif
+        }
+      }
+
+      default:
+        ;
+    }
+  }
+
+  // Prototyper-only: step 1 of video loop - clear source to release decoder
+  $rect <929,609,1169,649>
+  slot OnVideoRestart
+  {
+    sender; // consume unused parameter to suppress compiler warning
+
+    // Clear the video source to release the decoder, then re-assign in next frame
+    VideoSource.Name = "";
+    postsignal OnVideoReload;
+  }
+
+  // Prototyper-only: Step 2: re-assign the source to start from frame 0
+  $rect <929,649,1169,689>
+  slot OnVideoReload
+  {
+    sender; // consume unused parameter to suppress compiler warning
+
+    // Re-assign the video source to restart playback from frame 0
+    var string source = VideoSources[CtrlBar.SelectedIndex];
+
+    $if $prototyper || $composer
+    source = "file://..\\..\\..\\Extensions\\ExternVideo\\Media\\" + source;
+    $endif
+
+    VideoSource.Name = source;
+  }
+
+  // Initialization
+  note group Note1
+  {
+    attr Bounds = <380,-9,900,188>;
+  }
+
+  // Device Class Related Code
+  note group Note2
+  {
+    attr Bounds = <909,-9,1189,400>;
+  }
+
+  // Key Handling for Prototyper
+  note group Note3
+  {
+    attr Bounds = <1200,-9,1480,429>;
+  }
+
+  // State Handling
+  note group Note4
+  {
+    attr Bounds = <380,202,900,531>;
+  }
+
+  // Video Integration
+  note group Note5
+  {
+    attr Bounds = <909,409,1189,709>;
+  }
+
+  // Control Bar Callbacks
+  note group Note6
+  {
+    attr Bounds = <380,543,900,709>;
+  }
+
+  // Directives to adapt the order of the above members according to how these members 
+  // where arranged when the project content was stored. In this manner the storage 
+  // and the expected order of the members don't depend. Merging of changes in the 
+  // project files is simplified.
+  $member Init
+  $member Bounds
+  $member Background
+  $member BackgroundNext
+  $member BgFadeEffect
+  $member OnBgFadeDone
+  $member VideoView
+  $member Backgrounds
+  $member DarkBackgrounds
+  $member TimerCfg
+  $member DoneMsg
+  $member CtrlBar
+  $member ProgressInd
+  $member HandleArrowAction
+  $member DeviceRef
+  $member PreviousAdcValue
+  $member EncoderObserver
+  $member onEncoderChange
+  $member HardButtonHandler
+  $member HardButtonTimer
+  $member onHardButtonEvent
+  $member OnHardButtonTimerDone
+  $member KeyEnterHandler
+  $member onKeyEnter
+  $member KeyLeftHandler
+  $member KeyRightHandler
+  $member onKeyLeft
+  $member onKeyRight
+  $member onKeyLeftHold
+  $member onKeyRightHold
+  $member KeyHoldGateTimer
+  $member TimerState
+  $member RoundMaskView
+  $member OnControlBarAction
+  $member OnCountdownComplete
+  $member OnProgressTick
+  $member OnDoneExpired
+  $member OnSelectionChanged
+  $member OnCarouselTouch
+  $member VideoSource
+  $member VideoSources
+  $member StartVideo
+  $member StopVideo
+  $member OnVideoStateChanged
+  $member OnVideoRestart
+  $member OnVideoReload
+  $member Note1
+  $member Note2
+  $member Note3
+  $member Note4
+  $member Note5
+  $member Note6
+}
+
+// Timer display component - shows MM:SS text during time selection
+$rect <10,40,210,80>
+$output false
+class TimerConfigure : Core::Group
+{
+  $rect <400,40,640,80>
+  inherited property Bounds = <0,91,360,181>;
+
+  // Timer display text - centered in group
+  $rect <20,20,160,60>
+  object Views::Text TimerText
+  {
+    preset Bounds = <-1,0,359,90>;
+    preset Alignment = Views::TextAlignment[AlignHorzCenter, AlignVertCenter];
+    preset String = "00:00";
+    preset Font = Application::FontTimer;
+    preset Color = #FFFFFFFF;
+  }
+
+  // Timer value in total seconds (0 to 60)
+  $rect <400,80,640,120>
+  property int32 TimerSeconds = 0;
+
+  // Store the new timer value and refresh the displayed M:SS text
+  $rect <400,120,640,160>
+  onset TimerSeconds
+  {
+    // Store the new timer value
+    pure TimerSeconds = value;
+
+    // Convert total seconds to M:SS and update the display
+    var int32 minutes = pure TimerSeconds / 60;
+    var int32 seconds = pure TimerSeconds % 60;
+    TimerText.String = string( minutes ) + ":" + string( seconds, 2 );
+  }
+
+  // State and Countdown Handling 
+  note group Note1
+  {
+    attr Bounds = <380,-10,660,180>;
+  }
+}
+
+// Done screen component - shows "Ready" title and mode-specific subtitle with auto-dismiss
+$rect <10,80,210,120>
+$output false
+class DoneMessage : Core::Group
+{
+  $rect <400,40,640,80>
+  inherited property Bounds = <0,86,360,270>;
+
+  // Done title text - "Ready"
+  $rect <20,20,160,60>
+  object Views::Text DoneTitle
+  {
+    preset Bounds = <0,0,360,61>;
+    preset Alignment = Views::TextAlignment[AlignHorzCenter, AlignVertCenter];
+    preset String = "Ready";
+    preset Font = Application::FontDoneTitle;
+    preset Color = #FFFFFFFF;
+    preset Visible = true;
+  }
+
+  // Done subtitle text - mode-specific bold message
+  $rect <20,20,160,60>
+  object Views::Text DoneSubtitle
+  {
+    preset Bounds = <0,74,360,184>;
+    preset WrapText = true;
+    preset Alignment = Views::TextAlignment[AlignHorzCenter, AlignVertCenter];
+    preset String = "Enjoy your\nshake!";
+    preset Font = Application::FontDoneBold;
+    preset Color = #FFFFFFFF;
+    preset Visible = true;
+  }
+
+  // Touch handler - tapping anywhere on the done screen dismisses it immediately
+  $rect <20,60,220,100>
+  object Core::SimpleTouchHandler DismissTouchHandler
+  {
+    preset Point4 = <0,184>;
+    preset Point3 = <360,184>;
+    preset Point2 = <360,0>;
+    preset Point1 = <0,0>;
+    preset OnRelease = OnTouchDismiss;
+  }
+
+  // 3-second one-shot timer for auto-dismiss
+  $rect <400,160,640,200>
+  object Core::Timer DismissTimer
+  {
+    preset OnTrigger = OnDismissTimerExpired;
+    preset Period = 0;
+    preset Begin = 3000;
+    preset Enabled = true;
+  }
+
+  // Mode-specific done subtitle messages
+  $rect <880,120,1120,160>
+  array string DoneEnjoyTexts[ 6 ] =
+  (
+    Default[0] = "Enjoy your\nmeal!";
+    Default[1] = "Enjoy your\ncrush!";
+    Default[2] = "Enjoy your\nfroth!";
+    Default[3] = "Enjoy your\nshake!";
+    Default[4] = "Enjoy your\nmix!";
+    Default[5] = "Enjoy your\njuice!";
+  );
+
+  // Callback fired when the done message expires
+  $rect <400,80,640,120>
+  property slot OnExpired = null;
+
+  // Mode index (0-5) determines which subtitle text is shown on the done screen
+  $rect <400,120,640,160>
+  property int32 ModeIndex = 0;
+
+  // Look up the mode-specific "Enjoy your ..." text and apply it to the subtitle
+  $rect <640,120,880,160>
+  onset ModeIndex
+  {
+    // Store the new mode index
+    pure ModeIndex = value;
+
+    // Look up the mode-specific "Enjoy your ..." text and apply it
+    DoneSubtitle.String = DoneEnjoyTexts[value];
+  }
+
+  // User tapped directly on the done screen overlay
+  $rect <640,200,880,240>
+  slot OnTouchDismiss
+  {
+    // Notify the parent to tear down the done state immediately
+    signal OnExpired;
+  }
+
+  // 3-second auto-dismiss timer elapsed without user interaction
+  $rect <640,160,880,200>
+  slot OnDismissTimerExpired
+  {
+    // Notify the parent to transition back to IDLE state
+    signal OnExpired;
+  }
+
+  // State and Countdown Handling 
+  note group Note1
+  {
+    attr Bounds = <380,-10,1140,260>;
+  }
+
+  // Directives to adapt the order of the above members according to how these members 
+  // where arranged when the project content was stored. In this manner the storage 
+  // and the expected order of the members don't depend. Merging of changes in the 
+  // project files is simplified.
+  $member Bounds
+  $member OnExpired
+  $member DoneTitle
+  $member DoneSubtitle
+  $member DismissTouchHandler
+  $member OnTouchDismiss
+  $member DismissTimer
+  $member OnDismissTimerExpired
+  $member DoneEnjoyTexts
+  $member ModeIndex
+  $member OnSetModeIndex
+  $member Note1
+}
+
+// Countdown progress arc indicator - shows animated arc during timer countdown
+$rect <10,0,210,40>
+$output false
+class ProgressIndicator : Core::Group
+{
+  $rect <400,40,640,80>
+  inherited property Bounds = <0,0,360,320>;
+
+  // Arc path for circular countdown indicator (gap at top where no arc is drawn)
+  $rect <400,80,640,120>
+  object Graphics::ArcPath TimerArcPath
+  {
+    preset EndAngle = 410.0;
+    preset StartAngle = 130.0;
+    preset Radius = 155.0;
+    preset Style = Graphics::ArcStyle.Arc;
+  }
+
+  // Stroke renderer for the countdown arc
+  $rect <20,20,160,60>
+  object Views::StrokePath TimerArcStroke
+  {
+    preset Bounds = <0,0,360,320>;
+    preset Color = #FFFFFFFF;
+    preset Offset = <180,180>;
+    preset EndCap = Graphics::PathCap.Round;
+    preset StartCap = Graphics::PathCap.Round;
+    preset Width = 8.0;
+    preset Path = TimerArcPath;
+    preset Visible = true;
+  }
+
+  // Total countdown duration in seconds - setting this property starts the countdown \
+  // automatically
+  $rect <400,160,640,200>
+  property int32 TotalSeconds = 0;
+
+  // Remaining seconds in countdown (parent reads via OnTick)
+  $rect <400,200,640,240>
+  property int32 RemainingSeconds = 0;
+
+  // Callback fired when countdown reaches zero
+  $rect <640,120,880,160>
+  property slot OnCountdownDone = null;
+
+  // Callback fired every second during countdown
+  $rect <400,120,640,160>
+  property slot OnTick = null;
+
+  // 1-second periodic timer for countdown
+  $rect <929,81,1169,121>
+  object Core::Timer CountdownTimer
+  {
+    preset OnTrigger = OnCountdownTick;
+    preset Period = 1000;
+    preset Enabled = false;
+  }
+
+  // Continuous arc animation effect - animates from TotalSeconds*1000 down to 0
+  $rect <929,41,1169,81>
+  object Effects::Int32Effect ArcEffect
+  {
+    preset OnAnimate = OnArcAnimate;
+    preset Timing = Effects::Timing.Linear;
+    preset NoOfCycles = 1;
+    preset Enabled = false;
+  }
+
+  // Called every animation frame to smoothly shrink the arc. The arc spans 280 degrees \
+  // Maps the remaining milliseconds to an arc EndAngle using current ArcStart/ArcSpan.
+  $rect <1169,41,1409,81>
+  slot OnArcAnimate
+  {
+    if ( pure MaxSeconds > 0 )
+      TimerArcPath.EndAngle = ArcStart + ArcSpan * (float)ArcEffect.Value / (float)( pure MaxSeconds * 1000 );
+  }
+
+  // Fires once per second. Decrements the remaining time, notifies the parent (to \
+  // update the MM:SS display), and when zero is reached stops everything and fires \
+  // OnCountdownDone.
+  $rect <1169,81,1409,121>
+  slot OnCountdownTick
+  {
+    // Decrement remaining time by one second
+    pure RemainingSeconds = pure RemainingSeconds - 1;
+
+    // Notify the parent so it can update the MM:SS display
+    signal OnTick;
+
+    if ( pure RemainingSeconds <= 0 )
+    {
+      // Clamp to zero
+      pure RemainingSeconds = 0;
+
+      // Stop timers
+      CountdownTimer.Enabled = false;
+      ArcEffect.Enabled = false;
+
+      // Notify the parent that countdown is done
+      signal OnCountdownDone;
+    }
+  }
+
+  // Maximum selectable time in seconds (used for arc proportion)
+  $rect <400,240,640,280>
+  property int32 MaxSeconds = 60;
+
+  // Arc geometry: start angle and total span
+  $rect <400,280,640,320>
+  var float ArcStart = 130.0;
+
+  $rect <640,280,880,320>
+  var float ArcSpan = 280.0;
+
+  // Set static arc fill proportional to aSeconds / MaxSeconds (no countdown)
+  // Uses preview angles that avoid the visible button bar.
+  $rect <640,240,880,280>
+  method void SetPreview( arg int32 aSeconds )
+  {
+    // Stop any running countdown
+    CountdownTimer.Enabled = false;
+    ArcEffect.Enabled = false;
+
+    if ( pure MaxSeconds > 0 )
+      TimerArcPath.EndAngle = ArcStart + ArcSpan * (float)aSeconds / (float)pure MaxSeconds;
+    else
+      TimerArcPath.EndAngle = ArcStart;
+  }
+
+  // Start the countdown.
+  $rect <640,160,880,200>
+  method void StartCountdown( arg int32 aSeconds )
+  {
+    pure TotalSeconds = aSeconds;
+
+    if ( aSeconds <= 0 )
+      return;
+
+    // Initialize remaining seconds to the full duration
+    pure RemainingSeconds = aSeconds;
+
+    // Start with arc fill proportional to aSeconds / MaxSeconds
+    if ( pure MaxSeconds > 0 )
+      TimerArcPath.EndAngle = ArcStart + ArcSpan * (float)aSeconds / (float)pure MaxSeconds;
+    else
+      TimerArcPath.EndAngle = ArcStart + ArcSpan;
+
+    // Configure the arc effect to sweep down to empty
+    ArcEffect.Enabled = false;
+    ArcEffect.Value1 = aSeconds * 1000;
+    ArcEffect.Value2 = 0;
+    ArcEffect.CycleDuration = (int32)( aSeconds * 1000 );
+    ArcEffect.Enabled = true;
+
+    // Start 1-second tick timer for digit display
+    CountdownTimer.Enabled = false;
+    CountdownTimer.Enabled = true;
+  }
+
+  // Add or remove seconds during a running countdown. Restarts the arc effect
+  // from the current visual position so the sweep continues smoothly.
+  $rect <640,280,880,320>
+  method void AdjustTime( arg int32 aDelta )
+  {
+    var int32 newRemaining = pure RemainingSeconds + aDelta;
+
+    // Clamp to valid range
+    if ( newRemaining < 1 )
+      newRemaining = 1;
+    if ( newRemaining > pure MaxSeconds )
+      newRemaining = pure MaxSeconds;
+
+    pure RemainingSeconds = newRemaining;
+
+    // Notify parent to update MM:SS display
+    signal OnTick;
+
+    // Restart arc effect from current visual position to 0
+    var int32 currentMs = newRemaining * 1000;
+    ArcEffect.Enabled = false;
+    ArcEffect.Value1 = currentMs;
+    ArcEffect.Value2 = 0;
+    ArcEffect.CycleDuration = currentMs;
+    ArcEffect.Enabled = true;
+  }
+
+  // Circular touch handler for adjusting time by rotating on the arc
+  $rect <20,60,160,100>
+  object Core::RotateTouchHandler ArcTouchHandler
+  {
+    preset Bounds = <0,0,360,320>;
+    preset OnRotate = OnArcRotate;
+    preset OnStart = OnArcTouchStart;
+    preset CenterOffset = <0,0>;
+  }
+
+  // Seconds value when touch started (baseline for drag delta)
+  $rect <929,240,1169,280>
+  var int32 TouchStartSeconds;
+
+  // Touch started - save current seconds as baseline
+  $rect <929,200,1169,240>
+  slot OnArcTouchStart
+  {
+    // Derive current seconds from the arc position
+    if ( ArcSpan > 0.0 )
+      TouchStartSeconds = (int32)((TimerArcPath.EndAngle - ArcStart) / ArcSpan * (float)pure MaxSeconds);
+    else
+      TouchStartSeconds = 0;
+  }
+
+  // Dragging on the arc - map rotation to seconds
+  $rect <1167,200,1407,240>
+  slot OnArcRotate
+  {
+    // Map rotation degrees to seconds: full ArcSpan = MaxSeconds
+    var float degreesPerSecond = ArcSpan / (float)pure MaxSeconds;
+    var int32 deltaSec = -(int32)((float)ArcTouchHandler.Relative / degreesPerSecond);
+    var int32 newSec = TouchStartSeconds + deltaSec;
+
+    // Clamp
+    if ( newSec < 0 )
+      newSec = 0;
+    if ( newSec > pure MaxSeconds )
+      newSec = pure MaxSeconds;
+
+    // Update preview or running countdown
+    if ( CountdownTimer.Enabled )
+    {
+      // Running mode - use AdjustTime relative to current
+      var int32 diff = newSec - pure RemainingSeconds;
+      if ( diff != 0 )
+        AdjustTime( diff );
+    }
+    else
+    {
+      // Preview mode - update arc directly and notify parent
+      pure RemainingSeconds = newSec;
+      SetPreview( newSec );
+      signal OnTick;
+    }
+  }
+
+  // State Handling and Initialization
+  note group Note1
+  {
+    attr Bounds = <380,-9,900,340>;
+  }
+
+  // Arc Animation
+  note group Note2
+  {
+    attr Bounds = <909,-9,1429,141>;
+  }
+
+  // Arc Touch Handling
+  note group Note3
+  {
+    attr Bounds = <909,149,1429,299>;
+  }
+
+  // Directives to adapt the order of the above members according to how these members 
+  // where arranged when the project content was stored. In this manner the storage 
+  // and the expected order of the members don't depend. Merging of changes in the 
+  // project files is simplified.
+  $member Bounds
+  $member TimerArcPath
+  $member TimerArcStroke
+  $member TotalSeconds
+  $member RemainingSeconds
+  $member MaxSeconds
+  $member ArcStart
+  $member ArcSpan
+  $member SetPreview
+  $member StartCountdown
+  $member AdjustTime
+  $member OnCountdownDone
+  $member OnTick
+  $member CountdownTimer
+  $member ArcEffect
+  $member OnArcAnimate
+  $member OnCountdownTick
+  $member ArcTouchHandler
+  $member TouchStartSeconds
+  $member OnArcTouchStart
+  $member OnArcRotate
+  $member Note1
+  $member Note2
+  $member Note3
+}
+
+// Control bar component - circles, arrow button, press animations
+$rect <10,-40,210,0>
+$output false
+class ControlBar : Core::Group
+{
+  $rect <641,31,881,71>
+  inherited property Bounds = <0,174,360,394>;
+
+  $rect <20,20,160,60>
+  object Views::Image CircleOuter
+  {
+    preset Bounds = <33,35,327,182>;
+    preset AutoSize = true;
+    preset Color = #D2D2D25D;
+    preset Bitmap = Application::CircleOuterFill;
+    preset Visible = true;
+  }
+
+  $rect <20,20,160,60>
+  object Views::Image Selected
+  {
+    preset Bounds = <137,36,221,106>;
+    preset AutoSize = true;
+    preset Color = #FFFFFFA2;
+    preset Bitmap = Application::SelectedFill;
+    preset Visible = true;
+  }
+
+  // 5 icon slot views for the virtualized circular carousel
+  $rect <20,20,160,60>
+  object Views::Image IconSlot0
+  {
+    preset Bounds = <146,92,214,160>;
+    preset Color = #FFFFFFFF;
+  }
+
+  $rect <20,20,160,60>
+  object Views::Image IconSlot1
+  {
+    preset Bounds = <146,92,214,160>;
+    preset Color = #FFFFFFFF;
+  }
+
+  $rect <20,20,160,60>
+  object Views::Image IconSlot2
+  {
+    preset Bounds = <146,92,214,160>;
+    preset Color = #FFFFFFFF;
+  }
+
+  $rect <20,20,160,60>
+  object Views::Image IconSlot3
+  {
+    preset Bounds = <146,92,214,160>;
+    preset Color = #FFFFFFFF;
+  }
+
+  $rect <20,20,160,60>
+  object Views::Image IconSlot4
+  {
+    preset Bounds = <146,92,214,160>;
+    preset Color = #FFFFFFFF;
+  }
+
+  // Icon bitmap references for the 6 modes
+  $rect <401,81,641,121>
+  array Resources::Bitmap IconBitmaps[ 6 ] =
+  (
+    Default[0] = Application::IconChop;
+    Default[1] = Application::IconCrush;
+    Default[2] = Application::IconFroth;
+    Default[3] = Application::IconShake;
+    Default[4] = Application::IconStir;
+    Default[5] = Application::IconStrain;
+  );
+
+  // Slot view references for the 5 display positions
+  $rect <641,81,881,121>
+  array Views::Image IconSlots[ 5 ] =
+  (
+    Default[0] = IconSlot0;
+    Default[1] = IconSlot1;
+    Default[2] = IconSlot2;
+    Default[3] = IconSlot3;
+    Default[4] = IconSlot4;
+  );
+
+  $rect <20,20,160,60>
+  object Views::Image CircleInner
+  {
+    preset Bounds = <95,102,266,188>;
+    preset AutoSize = true;
+    preset Color = #FFFFFFBB;
+    preset Bitmap = Application::CircleInnerFill;
+    preset Visible = true;
+  }
+
+  // Arrow button icon in the inner circle
+  $rect <20,20,160,60>
+  object Views::Image ArrowButton
+  {
+    preset Bounds = <155,121,205,166>;
+    preset AutoSize = true;
+    preset Color = #FFFFF3FF;
+    preset Bitmap = Application::IconArrow;
+  }
+
+  // Touch handler for the arrow button
+  $rect <20,20,160,60>
+  object Core::SimpleTouchHandler ArrowTouchHandler
+  {
+    preset Point4 = <85,182>;
+    preset Point3 = <281,182>;
+    preset Point2 = <223,103>;
+    preset Point1 = <132,103>;
+    preset OnRelease = OnArrowRelease;
+    preset OnPress = OnArrowPress;
+  }
+
+  // Callback fired when arrow button is released
+  $rect <401,221,641,261>
+  property slot OnAction = null;
+
+  // Arrow button bitmap - parent sets arrow or play-pause icon
+  $rect <930,30,1170,70>
+  property Resources::Bitmap ArrowBitmap = null;
+
+  $rect <1170,30,1410,70>
+  onset ArrowBitmap
+  {
+    // Store the new bitmap and push it to the visible image view
+    pure ArrowBitmap = value;
+    ArrowButton.Bitmap = value;
+  }
+
+  // Touch press on the arrow area - dim to pressed gray
+  $rect <930,110,1170,150>
+  slot OnArrowPress
+  {
+    AnimateButton( #C0C0C0FF );
+  }
+
+  // Touch released on the arrow area - restore to white and notify parent
+  $rect <1170,110,1410,150>
+  slot OnArrowRelease
+  {
+    AnimateButton( #FFFFFFFF );
+    signal OnAction;
+  }
+
+  // Set button color on arrow, inner circle and selection highlight
+  $rect <930,70,1170,110>
+  method void AnimateButton( arg color aTarget )
+  {
+    ArrowButton.Color = aTarget;
+    CircleInner.Color = aTarget;
+    Selected.Color = aTarget;
+  }
+
+  // Container for outer ring, selection highlight and carousel icons
+  $rect <930,32,1170,72>
+  object Core::Group OuterGroup
+  {
+    preset Bounds = <0,0,360,220>;
+  }
+
+  // Container for inner circle, blur mask and arrow button
+  $rect <1170,32,1410,72>
+  object Core::Group InnerGroup
+  {
+    preset Bounds = <0,0,360,220>;
+  }
+
+  $rect <401,31,641,71>
+  inherited method Init()
+  {
+    // Reparent outer views into OuterGroup for batch visibility control
+    Remove( CircleOuter );
+    Remove( Selected );
+    Remove( IconSlot0 );
+    Remove( IconSlot1 );
+    Remove( IconSlot2 );
+    Remove( IconSlot3 );
+    Remove( IconSlot4 );
+
+    OuterGroup.Add( CircleOuter, 0 );
+    OuterGroup.Add( IconSlot0, 0 );
+    OuterGroup.Add( IconSlot1, 0 );
+    OuterGroup.Add( IconSlot3, 0 );
+    OuterGroup.Add( IconSlot4, 0 );
+
+    // Selected fill and center icon stay outside OuterGroup so they remain
+    // visible when the outer ring and non-selected icons are hidden
+    Add( Selected, 0 );
+    Add( IconSlot2, 0 );
+
+    // Reparent inner views into InnerGroup for batch visibility control
+    Remove( CircleInner );
+    Remove( ArrowButton );
+
+    InnerGroup.Add( CircleInner, 0 );
+    InnerGroup.Add( ArrowButton, 0 );
+
+    // Ensure ArrowTouchHandler is always at the top of z-order so it gets
+    // touch events before RotateHandler or any other view
+    Remove( ArrowTouchHandler );
+    Add( ArrowTouchHandler, 0 );
+
+    // Position icons at initial angle
+    UpdateIconPositions( 0.0 );
+  }
+
+  // Recalculate icon positions and opacity for the circular carousel. Uses 5 virtualized \
+  // image slots to display the 6 mode icons on a semicircular arc. Icons near the \
+  // top (90 degrees) are fully opaque; icons toward the edges fade out proportionally.
+  $rect <930,400,1170,440>
+  method void UpdateIconPositions( arg float aAngle )
+  {
+    var int32 centerX = 180;
+    var int32 centerY = 186;
+    var int32 radius = 118;
+    var int32 halfSize = 34;
+
+    // Phase: how far we've scrolled in mode-steps (1 step = 60 degrees of rotation)
+    var float phase = aAngle / 60.0;
+
+    // Nearest integer phase = the mode closest to the top position
+    var int32 centerPhase = (int32)math_round( phase );
+
+    var int32 s;
+
+    for ( s = 0; s < 5; s = s + 1 )
+    {
+      var int32 modePhase = centerPhase + s - 2;
+      var int32 modeIndex = modePhase % 6;
+
+      if ( modeIndex < 0 )
+        modeIndex = modeIndex + 6;
+
+      var float visualAngle = 90.0 - ((float)modePhase - phase) * 45.0;
+      var int32 x = centerX + (int32)((float)radius * math_cos( visualAngle ));
+      var int32 y = centerY - (int32)((float)radius * math_sin( visualAngle ));
+
+      var float angleDiff = visualAngle - 90.0;
+      if ( angleDiff < 0.0 )
+        angleDiff = -angleDiff;
+      var int32 opacity = 255 - (int32)(angleDiff / 90.0 * 200.0);
+      if ( opacity < 55 )
+        opacity = 55;
+
+      // Only assign properties that actually changed to minimize invalidations
+      var Resources::Bitmap newBmp = IconBitmaps[modeIndex];
+      if ( IconSlots[s].Bitmap != newBmp )
+        IconSlots[s].Bitmap = newBmp;
+
+      var rect newRect = rect( x - halfSize, y - halfSize, x + halfSize, y + halfSize );
+      if ( IconSlots[s].Bounds != newRect )
+        IconSlots[s].Bounds = newRect;
+
+      var color oldClr = IconSlots[s].Color;
+      var color newClr = color( oldClr.red, oldClr.green, oldClr.blue, (uint8)opacity );
+      if ( oldClr != newClr )
+        IconSlots[s].Color = newClr;
+    }
+  }
+
+  // Wrap an arbitrary angle into the 0..360 range using modular arithmetic
+  $rect <1170,400,1410,440>
+  method float NormalizeAngle( arg float aAngle )
+  {
+    // Shift into positive range, then wrap with modulo
+    var float result = aAngle;
+
+    while ( result < 0.0 )
+      result = result + 360.0;
+
+    while ( result >= 360.0 )
+      result = result - 360.0;
+
+    return result;
+  }
+
+  // Circular touch handler for rotation gestures
+  $rect <20,20,160,60>
+  object Core::RotateTouchHandler RotateHandler
+  {
+    preset Bounds = <0,6,360,186>;
+    preset OnRotate = HandleRotation;
+    preset OnEnd = OnRelease;
+    preset OnStart = OnTouchStart;
+    preset CenterOffset = <0,180>;
+  }
+
+  // FloatEffect interpolating the carousel angle (time-based, skips frames on slow \
+  // HW)
+  $rect <930,240,1170,280>
+  object Effects::FloatEffect IconMoveEffect
+  {
+    preset OnFinished = OnIconMoveDone;
+    preset OnAnimate = OnIconAnimate;
+    preset Timing = Effects::Timing.FastIn_EaseOut;
+    preset NoOfCycles = 1;
+    preset CycleDuration = 200;
+    preset Enabled = false;
+  }
+
+  // Called each rendered frame - interpolates the angle and repositions icons
+  $rect <1170,280,1410,320>
+  slot OnIconAnimate
+  {
+    UpdateIconPositions( IconMoveEffect.Value );
+  }
+
+  // Animation finished - store final angle and notify parent of new selection
+  $rect <1170,240,1410,280>
+  slot OnIconMoveDone
+  {
+    pure CurrentAngle = IconMoveTargetAngle;
+
+    // Update selected index now that icons are at rest
+    var float norm = NormalizeAngle( IconMoveTargetAngle );
+    var int32 newIndex = ((int32)((norm + 30.0) / 60.0)) % 6;
+    if ( newIndex != SelectedIndex )
+    {
+      SelectedIndex = newIndex;
+      signal OnSelectionChanged;
+    }
+  }
+
+  // Target angle for the running animation
+  $rect <641,261,881,301>
+  var float IconMoveTargetAngle;
+
+  // Animate icons from the current angle to the target angle
+  $rect <930,280,1170,320>
+  method void StartIconEffects( arg float aTargetAngle )
+  {
+    // Continue from the current animated position (no snap, no stop)
+    var float startAngle;
+    if ( IconMoveEffect.Enabled )
+    {
+      startAngle = IconMoveEffect.Value;
+      IconMoveEffect.Enabled = false;
+    }
+    else
+      startAngle = pure CurrentAngle;
+
+    pure CurrentAngle = startAngle;
+    IconMoveTargetAngle = aTargetAngle;
+
+    // Start effect: interpolate from current position to target
+    IconMoveEffect.Value1 = startAngle;
+    IconMoveEffect.Value2 = aTargetAngle;
+    IconMoveEffect.Enabled = true;
+  }
+
+  // Current rotation angle of the icon carousel
+  $rect <401,311,641,351>
+  property float CurrentAngle = 0.0;
+
+  // Update visuals whenever the carousel angle changes. Repositions all icons on \
+  // the arc and computes which mode is nearest to the top center. If the nearest \
+  // mode changed, fires OnSelectionChanged to the parent.
+  $rect <641,311,881,351>
+  onset CurrentAngle
+  {
+    // Skip redundant updates when the angle hasn't actually changed
+    if ( value == pure CurrentAngle )
+      return;
+
+    // Store new angle and reposition all icon slots on the arc
+    pure CurrentAngle = value;
+    UpdateIconPositions( pure CurrentAngle );
+
+    // Track which mode is nearest (background change deferred to OnIconMoveDone)
+    var float normalized = NormalizeAngle( value );
+    var int32 nearestIndex = ((int32)((normalized + 30.0) / 60.0)) % 6;
+    SelectedIndex = nearestIndex;
+  }
+
+  // Angle at the moment touch started
+  $rect <401,131,641,171>
+  var float StartAngle;
+
+  // Currently selected mode index (0-5)
+  $rect <641,131,881,171>
+  var int32 SelectedIndex = 0;
+
+  // Blocks rotation when true (set by parent during non-IDLE states)
+  $rect <401,181,641,221>
+  property bool Locked = false;
+
+  // Callback fired on any touch start (for done-screen dismiss)
+  $rect <641,181,881,221>
+  property slot OnTouch = null;
+
+  // Callback fired when SelectedIndex changes (for background updates)
+  $rect <641,221,881,261>
+  property slot OnSelectionChanged = null;
+
+  // Touch started - notifies parent, then snaps any running animation to its target \
+  // and saves the current angle as baseline for threshold detection
+  $rect <930,320,1170,360>
+  slot OnTouchStart
+  {
+    // Notify parent regardless of Locked state
+    signal OnTouch;
+
+    if ( pure Locked )
+      return;
+
+    // If an animation is running, complete it instantly and sync selection
+    if ( IconMoveEffect.Enabled )
+    {
+      IconMoveEffect.Enabled = false;
+      CurrentAngle = IconMoveTargetAngle;
+
+      var float norm = NormalizeAngle( IconMoveTargetAngle );
+      var int32 newIndex = ((int32)((norm + 30.0) / 60.0)) % 6;
+      if ( newIndex != SelectedIndex )
+      {
+        SelectedIndex = newIndex;
+        signal OnSelectionChanged;
+      }
+    }
+
+    // Save baseline for rotation threshold detection
+    StartAngle = pure CurrentAngle;
+  }
+
+  // Rotation gesture in progress - icons follow the finger directly
+  $rect <930,360,1170,400>
+  slot HandleRotation
+  {
+    if ( pure Locked )
+      return;
+
+    // Stop any running animation - finger takes over
+    if ( IconMoveEffect.Enabled )
+      IconMoveEffect.Enabled = false;
+
+    // Move icons directly with the finger (scaled to match visual arc speed)
+    var float totalAngle = StartAngle + (float)RotateHandler.Relative * 2.3;
+    CurrentAngle = totalAngle;
+  }
+
+  // Touch released - snap to the nearest detent and notify parent of selection
+  $rect <1170,320,1410,360>
+  slot OnRelease
+  {
+    if ( pure Locked )
+      return;
+
+    // Find nearest detent (multiple of 60 degrees)
+    var float angle = pure CurrentAngle;
+    var float snapped = math_round( angle / 60.0 ) * 60.0;
+
+    // Animate to the detent
+    StartIconEffects( snapped );
+
+    // Notify parent of the final selection (background change)
+    var float norm = NormalizeAngle( snapped );
+    var int32 newIndex = ((int32)((norm + 30.0) / 60.0)) % 6;
+    if ( newIndex != SelectedIndex )
+      SelectedIndex = newIndex;
+    signal OnSelectionChanged;
+  }
+
+  // Rotate the carousel by exactly one mode slot (60 degrees). aDirection: +1 = \
+  // clockwise, -1 = counter-clockwise. Called by parent for encoder clicks and keyboard \
+  // arrow presses. Ignores the call if the carousel is locked or already animating.
+  $rect <1170,360,1410,400>
+  method void RotateStep( arg int32 aDirection )
+  {
+    // Block rotation while carousel is locked
+    if ( pure Locked )
+      return;
+
+    // Chain from previous target if already animating, else from current angle
+    var float baseAngle;
+    if ( IconMoveEffect.Enabled )
+      baseAngle = IconMoveTargetAngle;
+    else
+      baseAngle = pure CurrentAngle;
+
+    // Animate icons to the next 60-degree detent
+    StartIconEffects( baseAngle + (float)aDirection * 60.0 );
+  }
+
+  // Center Button
+  note group Note
+  {
+    attr Bounds = <910,-8,1430,180>;
+  }
+
+  // State Handling and Initialization
+  note group Note1
+  {
+    attr Bounds = <380,-9,900,370>;
+  }
+
+  // Icon Carousel
+  note group Note2
+  {
+    attr Bounds = <910,190,1430,460>;
+  }
+
+  // Directives to adapt the order of the above members according to how these members 
+  // where arranged when the project content was stored. In this manner the storage 
+  // and the expected order of the members don't depend. Merging of changes in the 
+  // project files is simplified.
+  $member Init
+  $member Bounds
+  $member CircleOuter
+  $member Selected
+  $member IconSlot0
+  $member IconSlot1
+  $member IconSlot2
+  $member IconSlot3
+  $member IconSlot4
+  $member IconBitmaps
+  $member IconSlots
+  $member CircleInner
+  $member ArrowButton
+  $member OnAction
+  $member ArrowBitmap
+  $member OnSetArrowBitmap
+  $member OnArrowPress
+  $member OnArrowRelease
+  $member AnimateButton
+  $member OuterGroup
+  $member InnerGroup
+  $member UpdateIconPositions
+  $member NormalizeAngle
+  $member RotateHandler
+  $member ArrowTouchHandler
+  $member IconMoveEffect
+  $member IconMoveTargetAngle
+  $member OnIconAnimate
+  $member OnIconMoveDone
+  $member StartIconEffects
+  $member CurrentAngle
+  $member OnSetCurrentAngle
+  $member StartAngle
+  $member SelectedIndex
+  $member Locked
+  $member OnTouch
+  $member OnSelectionChanged
+  $member OnTouchStart
+  $member HandleRotation
+  $member OnRelease
+  $member RotateStep
+  $member Note
+  $member Note1
+  $member Note2
+}
+
+// Device class implementing the interface between GUI and hardware
+$rect <260,329,460,369>
+$output false
+class DeviceClass
+{
+  $rect <30,60,230,100>
+  inherited method Init()
+  {
+    aArg;
+
+    $if !$prototyper
+
+      native
+      {
+        DeviceIntegrationExample_Init();
+      }
+
+    $endif
+  }
+
+  $rect <230,60,430,100>
+  inherited method Done()
+  {
+    $if !$prototyper
+
+      native
+      {
+        DeviceIntegrationExample_Done();
+      }
+
+    $endif
+  }
+
+  // ADC value updated by the encoder via device driver
+  $rect <230,420,430,460>
+  property int32 AdcValue = 0;
+
+  // Called by device driver to update the ADC value from encoder rotation
+  $rect <30,420,230,460>
+  $output true
+  method void UpdateAdcValue( arg int32 aNewValue )
+  {
+    if ( aNewValue != pure AdcValue )
+    {
+      pure AdcValue = aNewValue;
+      notifyobservers ^AdcValue;
+    }
+  }
+
+  // System event triggered when the hardware button is pressed
+  $rect <230,540,430,580>
+  object Core::SystemEvent HardButtonEvent;
+
+  // Called by device driver when hardware button is pressed
+  $rect <30,540,230,580>
+  $output true
+  method void TriggerHardButtonEvent()
+  {
+    HardButtonEvent.Trigger( null, false );
+  }
+
+  // Directives to adapt the order of the above members according to how these members 
+  // where arranged when the project content was stored. In this manner the storage 
+  // and the expected order of the members don't depend. Merging of changes in the 
+  // project files is simplified.
+  $member Done
+  $member Init
+  $member AdcValue
+  $member UpdateAdcValue
+  $member HardButtonEvent
+  $member TriggerHardButtonEvent
+}
+
+// Global instance of the device interface
+$rect <260,369,460,409>
+autoobject Application::DeviceClass Device;
+
+$rect <260,-100,460,-60>
+$output false
+resource Resources::Bitmap RoundMask
+{
+  attr bitmapfile FileName = .\Res\360x360Mask.png;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Alpha8;
+  attr bitmapdithering Dithering = Auto;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <260,-50,460,-10>
+$output false
+resource Resources::Bitmap BackgroundChop
+{
+  attr bitmapfile FileName = .\Res\chop.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = RGB565;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <460,-50,660,-10>
+$output false
+resource Resources::Bitmap BackgroundCrush
+{
+  attr bitmapfile FileName = .\Res\crush.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = RGB565;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <260,-10,460,30>
+$output false
+resource Resources::Bitmap BackgroundWhip
+{
+  attr bitmapfile FileName = .\Res\whip.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = RGB565;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <460,-10,660,30>
+$output false
+resource Resources::Bitmap BackgroundShake
+{
+  attr bitmapfile FileName = .\Res\shake.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = RGB565;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <260,30,460,70>
+$output false
+resource Resources::Bitmap BackgroundStir
+{
+  attr bitmapfile FileName = .\Res\stir.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = RGB565;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <460,30,660,70>
+$output false
+resource Resources::Bitmap BackgroundStrain
+{
+  attr bitmapfile FileName = .\Res\strain.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = RGB565;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <260,80,460,120>
+$output false
+resource Resources::Bitmap IconChop
+{
+  attr bitmapfile FileName = .\Res\IconChop.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Alpha8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <460,80,660,120>
+$output false
+resource Resources::Bitmap IconCrush
+{
+  attr bitmapfile FileName = .\Res\IconCrush.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Alpha8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <260,120,460,160>
+$output false
+resource Resources::Bitmap IconFroth
+{
+  attr bitmapfile FileName = .\Res\IconFroth.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Alpha8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <460,120,660,160>
+$output false
+resource Resources::Bitmap IconShake
+{
+  attr bitmapfile FileName = .\Res\IconShake.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Alpha8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <260,160,460,200>
+$output false
+resource Resources::Bitmap IconStir
+{
+  attr bitmapfile FileName = .\Res\IconStir.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Alpha8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <460,160,660,200>
+$output false
+resource Resources::Bitmap IconStrain
+{
+  attr bitmapfile FileName = .\Res\IconStrain.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Alpha8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <660,80,860,120>
+$output false
+resource Resources::Bitmap CircleOuterFill
+{
+  attr bitmapfile FileName = .\Res\CircleOuter.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Alpha8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <660,160,860,200>
+$output false
+resource Resources::Bitmap SelectedFill
+{
+  attr bitmapfile FileName = .\Res\Selected.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Alpha8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <660,120,860,160>
+$output false
+resource Resources::Bitmap CircleInnerFill
+{
+  attr bitmapfile FileName = .\Res\CircleInner.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Alpha8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <660,-100,860,-60>
+$output false
+resource Resources::Bitmap IconArrow
+{
+  attr bitmapfile FileName = .\Res\IconArrow.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Alpha8;
+  attr bitmapmode Mode = Default;
+}
+
+// Large font for timer display (108px = 2x FontExtraLarge)
+$rect <10,190,210,230>
+$output false
+resource Resources::Font FontTimer
+{
+  attr fontname FontName = Roboto;
+  attr fontheight Height = 108;
+  attr fontquality Quality = High;
+  attr fontranges Ranges = 0x30-0x3A;
+  attr fontaspectratio AspectRatio = 1.0;
+  attr fontbold Bold = false;
+  attr fontitalic Italic = false;
+  attr fontkerning Kerning = true;
+  attr fontheightmode HeightMode = Compatible;
+  attr fontrowdistance RowDistance;
+}
+
+// Font for done message title
+$rect <10,270,210,310>
+$output false
+resource Resources::Font FontDoneTitle
+{
+  attr fontname FontName = Roboto;
+  attr fontheight Height = 56;
+  attr fontquality Quality = High;
+  attr fontranges Ranges = 0x20-0x7F;
+  attr fontaspectratio AspectRatio = 1.0;
+  attr fontbold Bold = false;
+  attr fontitalic Italic = false;
+  attr fontkerning Kerning = true;
+  attr fontheightmode HeightMode = Compatible;
+  attr fontrowdistance RowDistance;
+}
+
+// Bold font for done message subtitle
+$rect <10,230,210,270>
+$output false
+resource Resources::Font FontDoneBold
+{
+  attr fontname FontName = Roboto;
+  attr fontheight Height = 56;
+  attr fontquality Quality = High;
+  attr fontranges Ranges = 0x20-0x7F;
+  attr fontaspectratio AspectRatio = 1.0;
+  attr fontbold Bold = true;
+  attr fontitalic Italic = false;
+  attr fontkerning Kerning = true;
+  attr fontheightmode HeightMode = Compatible;
+  attr fontrowdistance RowDistance;
+}
+
+$rect <460,-100,660,-60>
+$output false
+resource Resources::Bitmap IconPlayPause
+{
+  attr bitmapfile FileName = .\Res\IconPlayPause.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize = <19,27>;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Native;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <660,-50,860,-10>
+$output false
+resource Resources::Bitmap BackgroundChopDark
+{
+  attr bitmapfile FileName = .\Res\chop_dark.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Index8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <860,-50,1060,-10>
+$output false
+resource Resources::Bitmap BackgroundCrushDark
+{
+  attr bitmapfile FileName = .\Res\crush_dark.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Index8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <660,-10,860,30>
+$output false
+resource Resources::Bitmap BackgroundWhipDark
+{
+  attr bitmapfile FileName = .\Res\whip_dark.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Index8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <860,-10,1060,30>
+$output false
+resource Resources::Bitmap BackgroundShakeDark
+{
+  attr bitmapfile FileName = .\Res\shake_dark.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Index8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <660,30,860,70>
+$output false
+resource Resources::Bitmap BackgroundStirDark
+{
+  attr bitmapfile FileName = .\Res\stir_dark.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Index8;
+  attr bitmapmode Mode = Default;
+}
+
+$rect <860,30,1060,70>
+$output false
+resource Resources::Bitmap BackgroundStrainDark
+{
+  attr bitmapfile FileName = .\Res\strain_dark.png;
+  attr bitmapdithering Dithering = Auto;
+  attr framesize FrameSize;
+  attr framedelay FrameDelay;
+  attr bitmapformat Format = Index8;
+  attr bitmapmode Mode = Default;
+}
+
+// Device class
+note group Note3
+{
+  attr Bounds = <240,240,480,440>;
+}
+
+// Font Resources
+note group Note2
+{
+  attr Bounds = <-10,150,230,330>;
+}
+
+// Widgets and classes
+note group Note6
+{
+  attr Bounds = <-10,-150,230,140>;
+}
+
+// Bitmap Resources
+note group Note4
+{
+  attr Bounds = <240,-150,1080,230>;
+}
+
+// Standmixer GUI application for the ESP32-S3 Knob Touch LCD 1.8" round display. \
+// Implements a 6-mode blender interface with a circular carousel, timer configuration, \
+// countdown progress arc and done screen. The state machine transitions through \
+// Idle, Setting, Running and Done phases.
+// 
+// This project also serves as a reference for integrating an external video player \
+// (ExternVideo) and external hardware inputs such as the rotary encoder knob via \
+// the DeviceClass interface.
+// 
+// For more information, please visit: https://doc.embedded-wizard.de/
+note legend Note5
+{
+  attr Bounds = <489,240,1080,440>;
+}
+
+// State Handling
+note group Note7
+{
+  attr Bounds = <-10,340,230,440>;
+}
+
+// Directives to adapt the order of the above members according to how these members 
+// where arranged when the project content was stored. In this manner the storage 
+// and the expected order of the members don't depend. Merging of changes in the 
+// project files is simplified.
+$member TimerStateEnum
+$member Inline
+$member Application
+$member DeviceClass
+$member Device
+$member RoundMask
+$member BackgroundChop
+$member BackgroundCrush
+$member BackgroundWhip
+$member BackgroundShake
+$member BackgroundStir
+$member BackgroundStrain
+$member IconChop
+$member IconCrush
+$member IconFroth
+$member IconShake
+$member IconStir
+$member IconStrain
+$member CircleOuterFill
+$member SelectedFill
+$member CircleInnerFill
+$member IconArrow
+$member IconPlayPause
+$member FontTimer
+$member FontDoneTitle
+$member FontDoneBold
+$member BackgroundChopDark
+$member BackgroundCrushDark
+$member BackgroundWhipDark
+$member BackgroundShakeDark
+$member BackgroundStirDark
+$member BackgroundStrainDark
+$member Note3
+$member Note2
+$member Note6
+$member Note4
+$member ControlBar
+$member ProgressIndicator
+$member TimerConfigure
+$member DoneMessage
+$member Note7
+$member Note5
