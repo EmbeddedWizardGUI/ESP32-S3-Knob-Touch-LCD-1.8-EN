@@ -1,6 +1,6 @@
 # Embedded Wizard Build Environment for Waveshare ESP32-S3-Knob-Touch-LCD-1.8
 
-![Screenshots](https://doc.embedded-wizard.de/data/Other/GitHub/ESP32-S3-Knob-Touch-LCD-1.8-EN/screenshots_v1.jpg)
+![Screenshots](https://doc.embedded-wizard.de/data/Other/GitHub/ESP32-S3-Knob-Touch-LCD-1.8-EN/screenshots_v2.jpg)
 
 ## Demo
 
