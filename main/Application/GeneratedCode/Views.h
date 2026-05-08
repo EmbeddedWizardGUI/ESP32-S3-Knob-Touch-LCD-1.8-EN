@@ -69,8 +69,8 @@
   #error Wrong version of Embedded Wizard Graphics Engine.
 #endif
 
-#include "_ViewsImage.h"
-#include "_ViewsStrokePath.h"
+#include "_ViewsFrame.h"
+#include "_ViewsRectangle.h"
 #include "_ViewsText.h"
 
 /* The definition Views::ImageAlignment determines the set of constraints to apply 

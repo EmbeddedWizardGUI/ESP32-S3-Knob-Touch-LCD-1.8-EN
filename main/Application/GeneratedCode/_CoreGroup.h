@@ -226,6 +226,8 @@ EW_END_OF_FIELDS( CoreGroup )
 
 /* Virtual Method Table (VMT) for the class : 'Core::Group' */
 EW_DEFINE_METHODS( CoreGroup, CoreRectView )
+  EW_METHOD( initLayoutContext, void )( CoreRectView _this, XRect aBounds, CoreOutline 
+    aOutline )
   EW_METHOD( GetRoot,           CoreRoot )( CoreView _this )
   EW_METHOD( Draw,              void )( CoreGroup _this, GraphicsCanvas aCanvas, 
     XRect aClip, XPoint aOffset, XInt32 aOpacity, XBool aBlend )
@@ -246,6 +248,8 @@ EW_DEFINE_METHODS( CoreGroup, CoreRectView )
   EW_METHOD( DispatchEvent,     XObject )( CoreGroup _this, CoreEvent aEvent )
   EW_METHOD( BroadcastEvent,    XObject )( CoreGroup _this, CoreEvent aEvent, XSet 
     aFilter )
+  EW_METHOD( UpdateLayout,      void )( CoreGroup _this, XPoint aSize )
+  EW_METHOD( UpdateViewState,   void )( CoreGroup _this, XSet aState )
   EW_METHOD( InvalidateArea,    void )( CoreGroup _this, XRect aArea )
 EW_END_OF_METHODS( CoreGroup )
 
@@ -547,6 +551,9 @@ XObject CoreGroup__BroadcastEvent( void* _this, CoreEvent aEvent, XSet aFilter )
    automatism by a user defined algorithm. */
 void CoreGroup_UpdateLayout( CoreGroup _this, XPoint aSize );
 
+/* Wrapper function for the virtual method : 'Core::Group.UpdateLayout()' */
+void CoreGroup__UpdateLayout( void* _this, XPoint aSize );
+
 /* The method UpdateViewState() is invoked automatically after the state of the 
    component has been changed. This method can be overridden and filled with logic 
    to ensure the visual aspect of the component does reflect its current state. 
@@ -562,6 +569,9 @@ void CoreGroup_UpdateLayout( CoreGroup _this, XPoint aSize );
    Usually, this method will be invoked automatically by the framework. Optionally 
    you can request its invocation by using the method @InvalidateViewState(). */
 void CoreGroup_UpdateViewState( CoreGroup _this, XSet aState );
+
+/* Wrapper function for the virtual method : 'Core::Group.UpdateViewState()' */
+void CoreGroup__UpdateViewState( void* _this, XSet aState );
 
 /* The method InvalidateViewState() declares the state of this component as changed, 
    so its visual aspect possibly doesn't reflect its current state anymore. To update 
@@ -585,6 +595,22 @@ void CoreGroup__InvalidateArea( void* _this, XRect aArea );
    'null'. In contrast to other find methods, FindSiblingView() will fail, if it 
    has been invoked with aView == 'null'. */
 CoreView CoreGroup_FindSiblingView( CoreGroup _this, CoreView aView, XSet aFilter );
+
+/* The method Restack() changes the Z-order of views in the component. Depending 
+   on the parameter aOrder the method will elevate or lower the given view aView. 
+   If aOrder is negative, the view will be lowered to the background. If aOrder 
+   is positive, the view will be elevated to the foreground. If aOrder == 0, no 
+   modification will take place.
+   The absolute value of aOrder determines the maximum number of sibling views the 
+   view has to skip over in order to reach its new Z-order. The effective stacking 
+   position of the view can additionally be affected by the value of the view's 
+   property @StackingPriority. Concrete, the view is prevented from being arranged 
+   in front of any sibling view configured with a higher @StackingPriority value. 
+   Similarly the view can't be arranged behind any sibling view having lower @StackingPriority 
+   value.
+   Please note, changing the Z-order of views within a component containing a Core::Outline 
+   view can cause this outline to update its automatic row or column formation. */
+void CoreGroup_Restack( CoreGroup _this, CoreView aView, XInt32 aOrder );
 
 /* The method Remove() removes the given view aView from the component. After this 
    operation the view doesn't belong anymore to the component - the view is not 

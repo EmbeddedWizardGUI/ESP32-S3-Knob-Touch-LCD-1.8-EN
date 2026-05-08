@@ -83,6 +83,12 @@
 #define _CoreLayoutContext_
 #endif
 
+/* Forward declaration of the class Core::Outline */
+#ifndef _CoreOutline_
+  EW_DECLARE_CLASS( CoreOutline )
+#define _CoreOutline_
+#endif
+
 /* Forward declaration of the class Core::QuadView */
 #ifndef _CoreQuadView_
   EW_DECLARE_CLASS( CoreQuadView )
@@ -105,6 +111,8 @@ EW_END_OF_FIELDS( CoreQuadView )
 
 /* Virtual Method Table (VMT) for the class : 'Core::QuadView' */
 EW_DEFINE_METHODS( CoreQuadView, CoreView )
+  EW_METHOD( initLayoutContext, void )( CoreQuadView _this, XRect aBounds, CoreOutline 
+    aOutline )
   EW_METHOD( GetRoot,           CoreRoot )( CoreView _this )
   EW_METHOD( Draw,              void )( CoreView _this, GraphicsCanvas aCanvas, 
     XRect aClip, XPoint aOffset, XInt32 aOpacity, XBool aBlend )
@@ -121,6 +129,10 @@ EW_DEFINE_METHODS( CoreQuadView, CoreView )
   EW_METHOD( GetExtent,         XRect )( CoreQuadView _this )
   EW_METHOD( ChangeViewState,   void )( CoreView _this, XSet aSetState, XSet aClearState )
 EW_END_OF_METHODS( CoreQuadView )
+
+/* 'C' function for method : 'Core::QuadView.initLayoutContext()' */
+void CoreQuadView_initLayoutContext( CoreQuadView _this, XRect aBounds, CoreOutline 
+  aOutline );
 
 /* 'C' function for method : 'Core::QuadView.ArrangeView()' */
 XPoint CoreQuadView_ArrangeView( CoreQuadView _this, XRect aBounds, XEnum aFormation );

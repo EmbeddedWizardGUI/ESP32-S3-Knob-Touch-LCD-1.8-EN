@@ -70,24 +70,12 @@
 #endif
 
 #include "_ResourcesBitmap.h"
-#include "_ResourcesExternVideo.h"
 #include "_ResourcesFont.h"
 #include "_ResourcesFontSet.h"
 
-/* The definition Resources::ExternVideoState enumerates the possible states the 
-   extern video decoder represented by the class Resources::ExternVideo may assume 
-   at its runtime. */
-typedef XEnum ResourcesExternVideoState;
-
-#define ResourcesExternVideoStateUndefined                  0
-#define ResourcesExternVideoStateBuffering                  1
-#define ResourcesExternVideoStateReady                      2
-#define ResourcesExternVideoStateResuming                   3
-#define ResourcesExternVideoStatePlaying                    4
-#define ResourcesExternVideoStatePaused                     5
-#define ResourcesExternVideoStateEndOfStreamReached         6
-#define ResourcesExternVideoStateError                      7
-#define ResourcesExternVideoStateNoNameSpecified            10
+/* The small version of the default font resource. The resource is using 'Roboto' 
+   TrueType font with 18 pixel height. */
+EW_DECLARE_FONT_RES( ResourcesFontSmall )
 
 #ifdef __cplusplus
   }

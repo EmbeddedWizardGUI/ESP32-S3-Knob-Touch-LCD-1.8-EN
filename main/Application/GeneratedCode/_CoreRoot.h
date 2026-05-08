@@ -197,6 +197,8 @@ EW_END_OF_FIELDS( CoreRoot )
 
 /* Virtual Method Table (VMT) for the class : 'Core::Root' */
 EW_DEFINE_METHODS( CoreRoot, CoreGroup )
+  EW_METHOD( initLayoutContext, void )( CoreRectView _this, XRect aBounds, CoreOutline 
+    aOutline )
   EW_METHOD( GetRoot,           CoreRoot )( CoreRoot _this )
   EW_METHOD( Draw,              void )( CoreRoot _this, GraphicsCanvas aCanvas, 
     XRect aClip, XPoint aOffset, XInt32 aOpacity, XBool aBlend )
@@ -217,6 +219,8 @@ EW_DEFINE_METHODS( CoreRoot, CoreGroup )
   EW_METHOD( DispatchEvent,     XObject )( CoreRoot _this, CoreEvent aEvent )
   EW_METHOD( BroadcastEvent,    XObject )( CoreRoot _this, CoreEvent aEvent, XSet 
     aFilter )
+  EW_METHOD( UpdateLayout,      void )( CoreGroup _this, XPoint aSize )
+  EW_METHOD( UpdateViewState,   void )( CoreGroup _this, XSet aState )
   EW_METHOD( InvalidateArea,    void )( CoreRoot _this, XRect aArea )
 EW_END_OF_METHODS( CoreRoot )
 

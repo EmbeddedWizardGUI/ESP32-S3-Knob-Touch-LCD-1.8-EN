@@ -1,0 +1,264 @@
+/*******************************************************************************
+*
+* Embedded Wizard - GUI Solutions by TARA Systems
+*
+*                                                Copyright (c) TARA Systems GmbH
+*                                    written by Paul Banach and Manfred Schweyer
+*
+********************************************************************************
+*
+* This file was generated automatically by Embedded Wizard tools based on the
+* GUI project configuration and resources provided by you.
+*
+* Please do not modify this file! Any changes will be lost when it is generated
+* again by the Embedded Wizard code generation process.
+*
+* The template of this heading text can be found in the file 'head.ewt' in the
+* directory 'Platforms' of your Embedded Wizard installation directory. If you
+* wish to adapt this text, please copy 'head.ewt' into your project directory
+* and edit only that copy. Please avoid any modifications of the original
+* template file.
+*
+* License, ownership and responsibility:
+*
+*   - The generated code is based on your project configuration and forms part
+*     of your application. The application-specific content of this file
+*     (including project-specific classes, resources and UI logic) is owned by
+*     you or your licensors. You remain responsible for the overall design,
+*     implementation, testing and validation of your application, including any
+*     project-specific code and any changes or additions you make to the
+*     generated code. TARA Systems GmbH is not responsible for defects or
+*     malfunctions caused by such project-specific content or modifications.
+*
+*   - The use of Embedded Wizard Studio, the Embedded Wizard command line code
+*     generator (ChoraC), the Embedded Wizard technology used to generate this
+*     file and any Embedded Wizard Platform Packages and Runtime Components
+*     required to build and run the generated code is subject to the Embedded
+*     Wizard license terms (as published at https://www.embedded-wizard.de/legal),
+*     including in particular:
+*
+*       - Embedded Wizard Terms and Conditions (EWTC)
+*       - Embedded Wizard License Agreement (EWLA)
+*       - Embedded Wizard Community License (EWCL)
+*
+*     The specific agreement(s) applicable to you and the applicable warranties
+*     and limitations of liability are exclusively governed by these license
+*     terms.
+*
+* Version  : 15.03
+* Profile  : ESP32
+* Platform : Espressif.ESP32.RGB565
+*
+*******************************************************************************/
+
+EW_DEFINE_BITMAP_FONT( EwFont_Roboto_HC20_C16, 16, 4, 0, 16 )
+  EW_FONT_GLYPH( 0x0000, 1, -12, 6, 12, 8, 0x00000000 ),
+  EW_FONT_GLYPH( 0x0020, 0, 0, 0, 0, 4, 0x000000F6 ),                  /* ' ' */
+  EW_FONT_GLYPH( 0x0021, 1, -12, 3, 12, 4, 0x000000F6 ),               /* '!' */
+  EW_FONT_GLYPH( 0x0022, 1, -13, 4, 4, 5, 0x0000014B ),                /* '"' */
+  EW_FONT_GLYPH( 0x0023, 1, -12, 10, 12, 10, 0x0000017C ),             /* '#' */
+  EW_FONT_GLYPH( 0x0024, 0, -14, 9, 16, 10, 0x0000031D ),              /* '$' */
+  EW_FONT_GLYPH( 0x0025, 0, -12, 12, 12, 12, 0x000004FA ),             /* '%' */
+  EW_FONT_GLYPH( 0x0026, 0, -12, 11, 12, 11, 0x000006C3 ),             /* '&' */
+  EW_FONT_GLYPH( 0x0027, 0, -13, 3, 4, 3, 0x00000889 ),                /* ''' */
+  EW_FONT_GLYPH( 0x0028, 1, -14, 5, 18, 6, 0x000008A5 ),               /* '(' */
+  EW_FONT_GLYPH( 0x0029, 0, -14, 5, 18, 6, 0x000009AD ),               /* ')' */
+  EW_FONT_GLYPH( 0x002A, 0, -12, 8, 7, 7, 0x00000A9D ),                /* '*' */
+  EW_FONT_GLYPH( 0x002B, 0, -10, 9, 9, 10, 0x00000B5C ),               /* '+' */
+  EW_FONT_GLYPH( 0x002C, 0, -2, 3, 4, 3, 0x00000C05 ),                 /* ',' */
+  EW_FONT_GLYPH( 0x002D, 0, -6, 5, 1, 5, 0x00000C32 ),                 /* '-' */
+  EW_FONT_GLYPH( 0x002E, 1, -2, 3, 2, 4, 0x00000C4E ),                 /* '.' */
+  EW_FONT_GLYPH( 0x002F, 0, -12, 7, 13, 7, 0x00000C5F ),               /* '/' */
+  EW_FONT_GLYPH( 0x0030, 1, -12, 8, 12, 10, 0x00000D42 ),              /* '0' */
+  EW_FONT_GLYPH( 0x0031, 1, -12, 5, 12, 10, 0x00000E63 ),              /* '1' */
+  EW_FONT_GLYPH( 0x0032, 0, -12, 9, 12, 10, 0x00000ED9 ),              /* '2' */
+  EW_FONT_GLYPH( 0x0033, 0, -12, 9, 12, 10, 0x00001038 ),              /* '3' */
+  EW_FONT_GLYPH( 0x0034, 0, -12, 10, 12, 10, 0x000011A6 ),             /* '4' */
+  EW_FONT_GLYPH( 0x0035, 1, -12, 8, 12, 10, 0x000012C1 ),              /* '5' */
+  EW_FONT_GLYPH( 0x0036, 1, -12, 8, 12, 10, 0x0000141C ),              /* '6' */
+  EW_FONT_GLYPH( 0x0037, 0, -12, 9, 12, 10, 0x00001570 ),              /* '7' */
+  EW_FONT_GLYPH( 0x0038, 0, -12, 9, 12, 10, 0x00001693 ),              /* '8' */
+  EW_FONT_GLYPH( 0x0039, 0, -12, 9, 12, 10, 0x0000181F ),              /* '9' */
+  EW_FONT_GLYPH( 0x003A, 1, -9, 3, 9, 4, 0x00001986 ),                 /* ':' */
+  EW_FONT_GLYPH( 0x003B, 0, -9, 4, 11, 4, 0x000019C2 ),                /* ';' */
+  EW_FONT_GLYPH( 0x003C, 0, -9, 8, 7, 9, 0x00001A25 ),                 /* '<' */
+  EW_FONT_GLYPH( 0x003D, 1, -8, 8, 4, 9, 0x00001B0C ),                 /* '=' */
+  EW_FONT_GLYPH( 0x003E, 1, -9, 8, 7, 9, 0x00001B92 ),                 /* '>' */
+  EW_FONT_GLYPH( 0x003F, 0, -12, 8, 12, 8, 0x00001C6D ),               /* '?' */
+  EW_FONT_GLYPH( 0x0040, 0, -12, 15, 16, 15, 0x00001D7A ),             /* '@' */
+  EW_FONT_GLYPH( 0x0041, 0, -12, 11, 12, 11, 0x0000207E ),             /* 'A' */
+  EW_FONT_GLYPH( 0x0042, 1, -12, 9, 12, 11, 0x00002208 ),              /* 'B' */
+  EW_FONT_GLYPH( 0x0043, 1, -12, 10, 12, 11, 0x00002346 ),             /* 'C' */
+  EW_FONT_GLYPH( 0x0044, 1, -12, 10, 12, 11, 0x000024B9 ),             /* 'D' */
+  EW_FONT_GLYPH( 0x0045, 1, -12, 9, 12, 10, 0x000025D9 ),              /* 'E' */
+  EW_FONT_GLYPH( 0x0046, 1, -12, 8, 12, 9, 0x000026C9 ),               /* 'F' */
+  EW_FONT_GLYPH( 0x0047, 1, -12, 10, 12, 12, 0x00002794 ),             /* 'G' */
+  EW_FONT_GLYPH( 0x0048, 1, -12, 10, 12, 12, 0x0000291F ),             /* 'H' */
+  EW_FONT_GLYPH( 0x0049, 1, -12, 3, 12, 5, 0x000029E2 ),               /* 'I' */
+  EW_FONT_GLYPH( 0x004A, 0, -12, 9, 12, 9, 0x00002A11 ),               /* 'J' */
+  EW_FONT_GLYPH( 0x004B, 1, -12, 10, 12, 11, 0x00002AE1 ),             /* 'K' */
+  EW_FONT_GLYPH( 0x004C, 1, -12, 8, 12, 9, 0x00002C29 ),               /* 'L' */
+  EW_FONT_GLYPH( 0x004D, 1, -12, 13, 12, 15, 0x00002CAC ),             /* 'M' */
+  EW_FONT_GLYPH( 0x004E, 1, -12, 10, 12, 12, 0x00002E33 ),             /* 'N' */
+  EW_FONT_GLYPH( 0x004F, 1, -12, 10, 12, 12, 0x00002F3A ),             /* 'O' */
+  EW_FONT_GLYPH( 0x0050, 1, -12, 10, 12, 11, 0x000030BC ),             /* 'P' */
+  EW_FONT_GLYPH( 0x0051, 1, -12, 10, 14, 12, 0x000031D3 ),             /* 'Q' */
+  EW_FONT_GLYPH( 0x0052, 1, -12, 9, 12, 10, 0x000033AC ),              /* 'R' */
+  EW_FONT_GLYPH( 0x0053, 0, -12, 10, 12, 10, 0x000034DB ),             /* 'S' */
+  EW_FONT_GLYPH( 0x0054, 0, -12, 10, 12, 10, 0x00003688 ),             /* 'T' */
+  EW_FONT_GLYPH( 0x0055, 1, -12, 9, 12, 11, 0x00003754 ),              /* 'U' */
+  EW_FONT_GLYPH( 0x0056, 0, -12, 11, 12, 11, 0x0000382B ),             /* 'V' */
+  EW_FONT_GLYPH( 0x0057, 0, -12, 15, 12, 15, 0x000039A4 ),             /* 'W' */
+  EW_FONT_GLYPH( 0x0058, 0, -12, 11, 12, 11, 0x00003BD4 ),             /* 'X' */
+  EW_FONT_GLYPH( 0x0059, 0, -12, 10, 12, 10, 0x00003D63 ),             /* 'Y' */
+  EW_FONT_GLYPH( 0x005A, 0, -12, 10, 12, 10, 0x00003E8B ),             /* 'Z' */
+  EW_FONT_GLYPH( 0x005B, 1, -14, 4, 17, 5, 0x00003FE7 ),               /* '[' */
+  EW_FONT_GLYPH( 0x005C, 0, -12, 7, 13, 7, 0x00004056 ),               /* '\' */
+  EW_FONT_GLYPH( 0x005D, 0, -14, 4, 17, 5, 0x00004136 ),               /* ']' */
+  EW_FONT_GLYPH( 0x005E, 0, -12, 7, 6, 7, 0x000041A2 ),                /* '^' */
+  EW_FONT_GLYPH( 0x005F, 0, 0, 8, 1, 8, 0x00004232 ),                  /* '_' */
+  EW_FONT_GLYPH( 0x0060, 0, -12, 4, 2, 5, 0x0000425B ),                /* '`' */
+  EW_FONT_GLYPH( 0x0061, 0, -9, 9, 9, 9, 0x00004284 ),                 /* 'a' */
+  EW_FONT_GLYPH( 0x0062, 1, -13, 8, 13, 10, 0x000043A5 ),              /* 'b' */
+  EW_FONT_GLYPH( 0x0063, 0, -9, 9, 9, 9, 0x000044B2 ),                 /* 'c' */
+  EW_FONT_GLYPH( 0x0064, 1, -13, 8, 13, 10, 0x000045C8 ),              /* 'd' */
+  EW_FONT_GLYPH( 0x0065, 0, -9, 9, 9, 9, 0x000046C3 ),                 /* 'e' */
+  EW_FONT_GLYPH( 0x0066, 0, -13, 6, 13, 6, 0x000047F9 ),               /* 'f' */
+  EW_FONT_GLYPH( 0x0067, 1, -9, 8, 12, 10, 0x000048A1 ),               /* 'g' */
+  EW_FONT_GLYPH( 0x0068, 1, -13, 7, 13, 9, 0x000049E3 ),               /* 'h' */
+  EW_FONT_GLYPH( 0x0069, 1, -13, 2, 13, 4, 0x00004A96 ),               /* 'i' */
+  EW_FONT_GLYPH( 0x006A, -1, -13, 4, 16, 4, 0x00004AD2 ),              /* 'j' */
+  EW_FONT_GLYPH( 0x006B, 1, -13, 8, 13, 9, 0x00004B49 ),               /* 'k' */
+  EW_FONT_GLYPH( 0x006C, 1, -13, 2, 13, 4, 0x00004C44 ),               /* 'l' */
+  EW_FONT_GLYPH( 0x006D, 1, -9, 13, 9, 15, 0x00004C6A ),               /* 'm' */
+  EW_FONT_GLYPH( 0x006E, 1, -9, 7, 9, 9, 0x00004D78 ),                 /* 'n' */
+  EW_FONT_GLYPH( 0x006F, 0, -9, 10, 9, 10, 0x00004E0F ),               /* 'o' */
+  EW_FONT_GLYPH( 0x0070, 1, -9, 8, 12, 10, 0x00004F38 ),               /* 'p' */
+  EW_FONT_GLYPH( 0x0071, 1, -9, 8, 12, 10, 0x00005046 ),               /* 'q' */
+  EW_FONT_GLYPH( 0x0072, 1, -9, 5, 9, 6, 0x0000514F ),                 /* 'r' */
+  EW_FONT_GLYPH( 0x0073, 0, -9, 8, 9, 9, 0x000051AE ),                 /* 's' */
+  EW_FONT_GLYPH( 0x0074, 0, -11, 6, 11, 6, 0x000052DB ),               /* 't' */
+  EW_FONT_GLYPH( 0x0075, 1, -9, 7, 9, 9, 0x0000536C ),                 /* 'u' */
+  EW_FONT_GLYPH( 0x0076, 0, -9, 8, 9, 8, 0x000053EF ),                 /* 'v' */
+  EW_FONT_GLYPH( 0x0077, 0, -9, 13, 9, 13, 0x000054F9 ),               /* 'w' */
+  EW_FONT_GLYPH( 0x0078, 0, -9, 8, 9, 8, 0x0000568A ),                 /* 'x' */
+  EW_FONT_GLYPH( 0x0079, 0, -9, 8, 12, 8, 0x000057A0 ),                /* 'y' */
+  EW_FONT_GLYPH( 0x007A, 0, -9, 8, 9, 8, 0x000058CF ),                 /* 'z' */
+  EW_FONT_GLYPH( 0x007B, 0, -13, 6, 16, 6, 0x000059D2 ),               /* '{' */
+  EW_FONT_GLYPH( 0x007C, 1, -12, 2, 14, 4, 0x00005AC9 ),               /* '|' */
+  EW_FONT_GLYPH( 0x007D, 0, -13, 6, 16, 6, 0x00005AEF ),               /* '}' */
+  EW_FONT_GLYPH( 0x007E, 1, -7, 10, 3, 12, 0x00005BE5 ),               /* '~' */
+
+  EW_FONT_PIXEL( EwFont_Roboto_HC20_C16, 0x00005C6D )           /* ratio 70.86 % */
+    0xCF7BDEE7, 0xD7FEF73A, 0x88879879, 0x181AD545, 0x50318003, 0x962206B5, 0x3ACF30F3,
+    0x7BD7FEF7, 0x004DC101, 0xF596579E, 0x778FF867, 0x81861081, 0xEC06E3F9, 0x0D6032AD,
+    0x9BDCF163, 0x1DCFDBBF, 0x7B8DFDCF, 0x98C1DF63, 0xB7FC0632, 0xF3EF7039, 0xAFB8DFDE,
+    0xBCFB9C7B, 0xB0C9E5F7, 0x0F927212, 0x004461DC, 0xA01101BA, 0x92FD737E, 0x2EBDC6FC,
+    0x8F9D169F, 0xEC391818, 0x9E9FF07C, 0xFA057DF5, 0x905DDE3F, 0x46F9FFEF, 0x7EBC1EFC,
+    0x5BE03731, 0x59F8E88F, 0x7E3BDF6F, 0xF7AFF583, 0x180F6057, 0xE7007EFB, 0x222E9ABD,
+    0xCF18771F, 0x1076E003, 0xD731DD39, 0xBEBBE703, 0xF7D8C17E, 0xCFFE77EB, 0xEFCE6A0B,
+    0xBDE0B93D, 0xA3FECA39, 0x68C0806B, 0xF1BD9463, 0xE4F7BE0B, 0x34E77F22, 0x2CFD9C70,
+    0xFCE47188, 0x3E5FC443, 0xDAE7307F, 0xDFA7C0B5, 0xFCCDE40F, 0xF6270F51, 0xC5739FCD,
+    0xBCF7E4F8, 0x541117F5, 0x95F5934F, 0xFDE1E2B8, 0x9FB1DEFA, 0x0106E32F, 0xDF58AB01,
+    0x7427BC63, 0x8A87590D, 0x44E62762, 0x9818800C, 0x13C4FF13, 0xD741D645, 0x5837BC60,
+    0xA83D67BF, 0xC5FA315F, 0x541EF8D4, 0x1E42860E, 0xF2060018, 0x83151430, 0xF968F26F,
+    0x02BE797B, 0x84182067, 0xFDE3BCF7, 0xCC47BD6F, 0x95AC67F3, 0x1EFD9BF0, 0x00EB3EFC,
+    0x07FD00AB, 0xBDCF0000, 0x3EF7BCD7, 0xDEF35EF7, 0x6400000B, 0x43397DC0, 0xEEFC733D,
+    0x07FBCFBD, 0x519E0A70, 0xFAC81E70, 0xE784ABE0, 0xCE078D40, 0xCC1FA884, 0x307DF01C,
+    0x056F82C6, 0x5F3DF678, 0x37BBEFA8, 0xD14D4EFE, 0x50C0D463, 0x0405C171, 0x82E22000,
+    0xDEA1855B, 0x18D744B1, 0xF9BDDFBF, 0xFEB1DCC1, 0x5E73DE3D, 0x00000EFD, 0x98000000,
+    0xE82F9EFB, 0x9FE7BBEE, 0x51EC96F9, 0x914C0CF9, 0x814542BF, 0x5F00ADF8, 0x079BE0BC,
+    0xD61275BC, 0xEF980FFA, 0xEFC74037, 0xCCFF7BDE, 0xAC1BCF7D, 0xCFF37BEE, 0x319C4B3B,
+    0x93C03EFC, 0xF819F78C, 0xDF83EDDD, 0xEE3036DD, 0x291278A8, 0xC4520F7C, 0x51EC86FC,
+    0x9BDCEFDE, 0x0177981B, 0x026F00D9, 0xE88173E6, 0x267BE04E, 0x102F3CF0, 0x378137BF,
+    0x6FA3DEFA, 0x1EF7BDF4, 0x0000037D, 0xF7BDEEFC, 0x7BDD6B2E, 0x881792EF, 0xF73DE904,
+    0x9CEA2257, 0x2D38C6FC, 0x6B02F1DE, 0x2F7E028E, 0x378DF9AC, 0x3FF378F4, 0x41FF19EE,
+    0xEC62FFF6, 0xBE671738, 0xD8347303, 0x1BFB9F4F, 0xF89EE3E6, 0xF11D3C47, 0x7F9E1299,
+    0xE07BF024, 0x45F1CFF9, 0x75C6637C, 0xBDCF1BAF, 0xF77BDEF7, 0xF7BDEF73, 0x134C07C4,
+    0xC73026F8, 0xA0957C07, 0x1ADC0BC6, 0xDE01D460, 0x0FD6407C, 0xD9E04CF8, 0xF3C17CF7,
+    0xE6C7777D, 0x166F298E, 0xB8A72700, 0xDEFBD4A3, 0xEF3CFF33, 0xD3FCCF77, 0x98DF11EB,
+    0xCAF220F2, 0x5BE3C883, 0xB4E5F88F, 0x0DD7BDFA, 0x17FEFFE6, 0x7DF7BF66, 0xEA59BF17,
+    0x8FF2237D, 0x1148078A, 0x778691B1, 0xEB0C7195, 0xC9B76F7D, 0x189FDFFA, 0xFD40BBC0,
+    0xBDE9D634, 0xF787FBC3, 0x3FDE000F, 0xFBC0FF78, 0xBEE00007, 0xCCF28638, 0xA0FBE401,
+    0x9A67FF7E, 0x1EF72FFF, 0x3BEF3BCF, 0xDF79DE78, 0x72FFF981, 0xFDFA81EF, 0xF7BBF99F,
+    0xEFC77BDE, 0x1DEF7BDE, 0xEF7BBF00, 0x137C77BD, 0xE89D3EC8, 0x7BFDCBF3, 0xF9FF7CF0,
+    0x9EDF9E0D, 0x1BF3E8DF, 0xFB23DFFF, 0xE77E4274, 0x3DD706FC, 0x86F957F1, 0x60EEAA37,
+    0xFC166E01, 0xF3EF039E, 0x00D6B01F, 0x24F01FBF, 0x80006FF0, 0x9DDDCFB5, 0x7B9FF8C0,
+    0x20B739EE, 0xC83BEFFF, 0xF781DF79, 0x19BB202D, 0xCFFCF173, 0xF09E786F, 0x1CEFCF15,
+    0x3678F3C5, 0x320AC3DD, 0x117234E4, 0x0CCC2209, 0x20103172, 0x32E4AB25, 0xAD237873,
+    0xFE8DB50A, 0x7D9F6FFF, 0xAC33FE5E, 0xDFF9AFF3, 0x01F9EA2F, 0x22EC5F80, 0xBDF8019E,
+    0x017DDCF7, 0x1C02773C, 0x8E6A201F, 0xF378CC01, 0x99E57C07, 0x8BF5E460, 0x8C78BE07,
+    0x4F0AB03C, 0x7B9E3305, 0x8FF932EF, 0xCFBDEF7B, 0x3703EB27, 0x9E058BEB, 0xF7BDEF3C,
+    0xBDC4DFFE, 0xF205E6F7, 0xC60000E4, 0xEF7B835B, 0xDEF7178E, 0xF8806EB3, 0x01C204E5,
+    0xE5F901C2, 0xE3BBDEE4, 0xF3DF7306, 0x7D7EF81B, 0xE797FECF, 0xD7AAC539, 0x8E760319,
+    0x8EF301E7, 0x00400000, 0xEF301E78, 0xCEC06338, 0xB0673CF1, 0xEEFBE5EA, 0xDE5FFB3D,
+    0x3DF9EF7B, 0xFA73DEE0, 0x3E673C05, 0xC02F5180, 0x0004001E, 0x07B00200, 0xCC0BD460,
+    0xEF707CFF, 0xDE5EFFF9, 0xF7BDEF7B, 0xEF7BDEE2, 0x00000005, 0x0EF7BDEE, 0x1DEF7BDC,
+    0x00000000, 0xBDEF7B80, 0xEF7BDE37, 0xBDCFF7BD, 0x003FDEF7, 0xDEF70000, 0xEF7B837B,
+    0x000001BD, 0xDAC00000, 0xBF0AFCF7, 0xBFD9EFAF, 0xAC53A9E9, 0xF018CED9, 0x603E633D,
+    0x800246FC, 0x27DEF7B8, 0x66EF7107, 0x0F93802D, 0x61EFD6A0, 0xEFF4B1BC, 0xCEC67B9C,
+    0x1FFF02F7, 0x00000000, 0x7BDEF700, 0x7BDEE26F, 0x00004DEF, 0x00000000, 0x00001BAC,
+    0x75800000, 0x00000003, 0x00000000, 0x4F101630, 0xE569FE27, 0xC4FA9E1B, 0x5EDF7B8D,
+    0xFFF90BDE, 0x03E27101, 0xDE0138BE, 0xEB5824E7, 0x67ECC03F, 0x99EFBF00, 0x1EDE79C0,
+    0x09CF5860, 0x403E37C0, 0x3500B57C, 0x000BDEBB, 0x00000000, 0x00000000, 0xBDEF7000,
+    0x0FDEF7F7, 0x02A2EFB0, 0xC130818C, 0x41F51897, 0x2CDE0FAC, 0xC631852C, 0xF08957C1,
+    0x02F1A855, 0x00C674CB, 0x1F517D62, 0x099F97C0, 0x002D4630, 0xDDF81F3E, 0x05CBEE01,
+    0xB180D188, 0xB8F400E6, 0x4068EF00, 0x778099CD, 0x2C77801C, 0xA017CD40, 0x30BC4007,
+    0x81BF3DF7, 0xECF7D7F7, 0x29E6A3FF, 0x6339FCD6, 0x1EB317C0, 0x30037190, 0x8C008012,
+    0x71901E7C, 0xC5F018EF, 0x358A79AA, 0xDDFDE17F, 0xB1FFF67B, 0xEEF7BDEE, 0xFBDEE709,
+    0xDE780BF6, 0x80948019, 0x4FBD4094, 0xFDBDEE70, 0xDEF7387E, 0x000000BD, 0xF9E00000,
+    0xF42BF39D, 0xFFF39CEF, 0x0F7EB1A6, 0xE2FCEDF3, 0xF3CF1981, 0x247FC880, 0xC8006330,
+    0x0F3C6604, 0xF17FFC88, 0xAC678CC0, 0x3B7CC3DF, 0xD39CEFF5, 0x9CEFCF0A, 0x7201FB9D,
+    0xF7BFF9AF, 0xEEA37FDE, 0xC0D9E7BD, 0x14C051E8, 0x754134C0, 0xFDEF750D, 0xDEEA3F3D,
+    0xCD72007F, 0x31035A00, 0xA6AF0257, 0x26FEE77E, 0xEE7FEFE6, 0x4CF7E6ED, 0x031A57AA,
+    0x06B5866A, 0xB5DE1DF2, 0xFF7807BF, 0xC834F7FF, 0xE36D77B5, 0x8A8F644D, 0xEB9100F9,
+    0x47CE8C9D, 0x4F73FF7F, 0xF7BDEF6D, 0xEFEF7BDE, 0xDE56F7BD, 0x00007F7B, 0x00000000,
+    0x00000000, 0xFFF00000, 0x001FDF81, 0x00000000, 0x00100000, 0xEF5980F5, 0x7E7C52F8,
+    0x7BBDC7B1, 0x80775CEC, 0x03F4D771, 0x01EA333F, 0x0393854F, 0x7C4F0F23, 0x5AC1E2F8,
+    0x28BE0B58, 0x3C8C1F15, 0x57C039FE, 0x89E03EB1, 0xD6403C5F, 0xFE380953, 0xBC81DCF0,
+    0x07974E13, 0xFC463F8F, 0x3E763723, 0x785A9478, 0x867628BE, 0xD662A99B, 0xF9651566,
+    0xB992EC57, 0xAB6ADCC9, 0x3D614B11, 0xFAC46599, 0x278F6067, 0x41576B07, 0xE57B0AF9,
+    0xA3FC8C85, 0x14540A32, 0xE7926462, 0xF27E7107, 0x65ED07AD, 0x37CC668D, 0xC772C771,
+    0x77DF3182, 0x5CC7A05C, 0xDE004003, 0x98C0B3D1, 0x9C17AAEF, 0x7468F4B1, 0xC35CC65E,
+    0xF3A07398, 0xE700EF7A, 0xA2B0D1D7, 0xBC41ADE3, 0x79B2B0CF, 0xE72ABA35, 0x7FA33C4C,
+    0x5F31DC1A, 0x80588C60, 0x00000035, 0xEF7B8800, 0x11DEF7BD, 0x4F7BDEF7, 0xB8F4018E,
+    0x8039CD40, 0x8EF03477, 0x039CD40B, 0xCE81B378, 0x06B58C03, 0x9181B270, 0xF7BDEF79,
+    0x8FBDDFAE, 0x00000FBA, 0x00000000, 0x3ACFBA80, 0xEA207A60, 0x95095380, 0xF01EF81F,
+    0x01D64164, 0x131E02A7, 0x72FC0FCC, 0xFFDF18C0, 0x00FFF1DE, 0x00000000, 0x7FF80000,
+    0xCF80EE30, 0x05735887, 0xF263BC73, 0x8D4FBE7D, 0x7BDD6669, 0xCDF7BDEF, 0xAFFC8BFD,
+    0x7FDFFAC9, 0xDF73DFA3, 0xA877A8B9, 0x4617B1FA, 0xDEFFEF10, 0xDEE79D89, 0xC033C8C9,
+    0xC2E61B88, 0x2B39CE3F, 0x0000BDE3, 0xFFCF0000, 0x7DDC1FFE, 0xC2F8AFBF, 0x07A8171A,
+    0x00DC01B8, 0x585F11EA, 0xBFFB8DA3, 0xBF506FBF, 0x7EA0DE7B, 0x4FF3BBFF, 0x547B29CF,
+    0x1FB18B8C, 0x00608C06, 0x96F22E31, 0xA3BC539E, 0x6F7FEFD4, 0x017DC06E, 0xBED40000,
+    0xEAF8C9FF, 0x2D9BCBEE, 0xE201EA5E, 0x2A817100, 0x2F16CDE0, 0x6FBBABE3, 0x34F77EA2,
+    0xFFF7DBEA, 0xE32D74BC, 0x46C72337, 0xEF7BC279, 0x7BBE0BFD, 0xC8CFBDEF, 0xC5CF490D,
+    0xEDF9E1DA, 0x883BFE7B, 0xEB7E1CEF, 0xC409EA1E, 0xD77D5D65, 0x002EFABA, 0x00000000,
+    0xB9FFBED4, 0x773DF1DF, 0xAF1DE19F, 0x480AB4E8, 0x01560240, 0x69D168EF, 0x41F7757C,
+    0x4E9FFBED, 0x9CBE21ED, 0xDD7BDDF5, 0x00000BB8, 0xF9CFB700, 0x7B3FF9A5, 0xBF23E6BE,
+    0x000085C7, 0xF7C00000, 0xFBF1FBE3, 0x3FB00001, 0xFFC07F60, 0x00000007, 0xF7D18C00,
+    0x003FFF79, 0xF2000000, 0xF9F7107C, 0xF83F1FE0, 0x231E1FC5, 0x04EB7F21, 0x9C07D796,
+    0xDF318167, 0x0003FBF1, 0xF5DEFC00, 0xDF8C7BBF, 0xFFCACD3D, 0xF7BEE759, 0x88F3CB9B,
+    0x67AA6F9B, 0x00026583, 0x00000000, 0x77000000, 0xF0BF39F5, 0x3F9ECFFE, 0xB94F91F3,
+    0x000001B8, 0x77C60000, 0xFF206FCE, 0x0FF8EE79, 0xD9D16CDE, 0x47BF053C, 0x111105C4,
+    0x7E7846E0, 0x4D9D0F50, 0xE3FE3367, 0xEF0FFC9C, 0x8BBBFF9E, 0xF9F7FE71, 0xF1DE6C86,
+    0x0900B502, 0x6C96A048, 0xFBCAF1DE, 0x5837CFBF, 0x000BBBFF, 0x3FF7DA80, 0xEAFC6BFF,
+    0xB47A9BEE, 0x880A7978, 0x9E05C40B, 0xBC5B3A02, 0xBEEEAF8C, 0x13FF7DA8, 0x6FDF8000,
+    0xE713D79D, 0x00002635, 0x7FEB0000, 0xCF7ACDFF, 0xCFDB677D, 0xE7ECB350, 0xE7D5B7A1,
+    0xEFE616FE, 0x1773EF9E, 0xDF98F7CF, 0x7EF2BF90, 0x13E7EEE7, 0x8EFC0177, 0xFA3BF1BE,
+    0x00000006, 0x6FC0E220, 0xD617719D, 0x00000005, 0x4F505C40, 0xDD6FD7A8, 0x0FF79673,
+    0x839FF7FF, 0x8FE55F91, 0xC3CF0E5F, 0x31CBF0F3, 0xBF18C7F2, 0xE7BF031A, 0xE39983F7,
+    0x9E4AA881, 0xE41DD41B, 0xF7F14A7D, 0xDA89E2A3, 0x61FB1554, 0x91DE3197, 0x5599536A,
+    0x878C9E39, 0x7EBBF591, 0xDF5132BB, 0x0BFD4F28, 0xA390A8F6, 0x7E3650FE, 0xC8BB8C51,
+    0xA6F58EF3, 0xF47ABC77, 0xF3CE2F53, 0xF151859B, 0xC46CAA83, 0xF0F3CF3B, 0x2FE63D1B,
+    0x7ED0E9EA, 0x7EF381EF, 0x8DF150F1, 0xF873FC3C, 0x9E1EB09E, 0x591F1558, 0x9C48FFFF,
+    0x613C1F5A, 0x7500AA81, 0x73C28F40, 0xEF7185C7, 0xE3BEF7BD, 0xF89F7BDE, 0x2274F3C1,
+    0xF3E1357E, 0x205FACC1, 0x8CE079FB, 0x7BC8C60F, 0xBF23FDEF, 0x58B1DC45, 0x8002B8D9,
+    0xF3C3D644, 0x2C7B3CD7, 0x0903F58C, 0x25FC0202, 0xFE06F19E, 0x000FD739, 0x25F58000,
+    0xCE81B8D6, 0x40407085, 0x8E895980, 0xFDCAC3FF, 0x0481ADF0, 0x27F0C080, 0xFCCC3C7A,
+    0xB0B39F43, 0xDDEE7CD6, 0xE32FC8BF, 0xBB8DF88B, 0x000007BF
+
+  EW_FONT_KERNING_CODES( EwFont_Roboto_HC20_C16 )
+  EW_FONT_KERNING_VALUES( EwFont_Roboto_HC20_C16 )
+EW_END_OF_BITMAP_FONT( EwFont_Roboto_HC20_C16 )
+
+/* Embedded Wizard */

@@ -69,45 +69,7 @@
   #error Wrong version of Embedded Wizard Graphics Engine.
 #endif
 
-#include "_EffectsEffect.h"
 #include "_EffectsEffectTimerClass.h"
-#include "_EffectsFloatEffect.h"
-#include "_EffectsInt32Effect.h"
-#include "_EffectsTimingList.h"
-
-/* The definition Effects::Timing determines the available timing functions for 
-   animation effects. Except the 'Custom' item, all items of this definition represent 
-   build-in timing functions. These can be simply selected in the effect property 
-   Timing. */
-typedef XEnum EffectsTiming;
-
-#define EffectsTimingLinear                                 0
-#define EffectsTimingPower_In                               1
-#define EffectsTimingPower_Out                              2
-#define EffectsTimingPower_InOut                            3
-#define EffectsTimingExp_In                                 4
-#define EffectsTimingExp_Out                                5
-#define EffectsTimingExp_InOut                              6
-#define EffectsTimingSine_In                                7
-#define EffectsTimingSine_Out                               8
-#define EffectsTimingSine_InOut                             9
-#define EffectsTimingCircle_In                              10
-#define EffectsTimingCircle_Out                             11
-#define EffectsTimingCircle_InOut                           12
-#define EffectsTimingBack_In                                13
-#define EffectsTimingBack_Out                               14
-#define EffectsTimingBack_InOut                             15
-#define EffectsTimingElastic_In                             16
-#define EffectsTimingElastic_Out                            17
-#define EffectsTimingElastic_InOut                          18
-#define EffectsTimingBounce_In                              19
-#define EffectsTimingBounce_Out                             20
-#define EffectsTimingBounce_InOut                           21
-#define EffectsTimingEaseIn_FastOut                         22
-#define EffectsTimingFastIn_EaseOut                         23
-#define EffectsTimingEaseIn_EaseOut                         24
-#define EffectsTimingFastIn_FastOut                         25
-#define EffectsTimingCustom                                 26
 
 /* The global autoobject Effects::EffectTimer triggers all actually active animation 
    effects. In this way all effects will run simultanously. Per default the timer 

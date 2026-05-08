@@ -64,18 +64,11 @@
 #include "_CoreLayoutContext.h"
 #include "_CoreLayoutQuadContext.h"
 #include "_CoreOutline.h"
-#include "_CorePropertyObserver.h"
 #include "_CoreQuadView.h"
 #include "_CoreRectView.h"
 #include "_CoreResource.h"
 #include "_CoreRoot.h"
-#include "_CoreRotateTouchHandler.h"
 #include "_CoreSimpleTouchHandler.h"
-#include "_CoreSystemEvent.h"
-#include "_CoreSystemEventHandler.h"
-#include "_CoreSystemEventTask.h"
-#include "_CoreTask.h"
-#include "_CoreTaskQueue.h"
 #include "_CoreTimer.h"
 #include "_CoreView.h"
 #include "_GraphicsCanvas.h"
@@ -89,10 +82,12 @@ EW_CONST_STRING_PRAGMA static const unsigned short _StringsDefault0[] =
   0x0020, 0x0062, 0x0065, 0x006C, 0x006F, 0x006E, 0x0067, 0x0020, 0x0074, 0x006F,
   0x0020, 0x0074, 0x0068, 0x0069, 0x0073, 0x0020, 0x0067, 0x0072, 0x006F, 0x0075,
   0x0070, 0x0000, 0xC557, 0x004E, 0x006F, 0x0020, 0x0076, 0x0069, 0x0065, 0x0077,
-  0x0020, 0x0074, 0x006F, 0x0020, 0x0072, 0x0065, 0x006D, 0x006F, 0x0076, 0x0065,
-  0x0000, 0xC557, 0x0056, 0x0069, 0x0065, 0x0077, 0x0020, 0x0069, 0x0073, 0x0020,
-  0x006E, 0x006F, 0x0074, 0x0020, 0x0069, 0x006E, 0x0020, 0x0074, 0x0068, 0x0069,
-  0x0073, 0x0020, 0x0067, 0x0072, 0x006F, 0x0075, 0x0070, 0x0000, 0xC557, 0x004E,
+  0x0020, 0x0074, 0x006F, 0x0020, 0x0072, 0x0065, 0x0073, 0x0074, 0x0061, 0x0063,
+  0x006B, 0x0000, 0xC557, 0x0056, 0x0069, 0x0065, 0x0077, 0x0020, 0x0069, 0x0073,
+  0x0020, 0x006E, 0x006F, 0x0074, 0x0020, 0x0069, 0x006E, 0x0020, 0x0074, 0x0068,
+  0x0069, 0x0073, 0x0020, 0x0067, 0x0072, 0x006F, 0x0075, 0x0070, 0x0000, 0xC557,
+  0x004E, 0x006F, 0x0020, 0x0076, 0x0069, 0x0065, 0x0077, 0x0020, 0x0074, 0x006F,
+  0x0020, 0x0072, 0x0065, 0x006D, 0x006F, 0x0076, 0x0065, 0x0000, 0xC557, 0x004E,
   0x006F, 0x0020, 0x0076, 0x0069, 0x0065, 0x0077, 0x0020, 0x0074, 0x006F, 0x0020,
   0x0061, 0x0064, 0x0064, 0x0000, 0xC557, 0x0056, 0x0069, 0x0065, 0x0077, 0x0020,
   0x0061, 0x006C, 0x0072, 0x0065, 0x0061, 0x0064, 0x0079, 0x0020, 0x0069, 0x006E,
@@ -110,16 +105,7 @@ EW_CONST_STRING_PRAGMA static const unsigned short _StringsDefault0[] =
   0x006F, 0x0074, 0x0020, 0x0062, 0x0065, 0x0069, 0x006E, 0x0067, 0x0020, 0x0064,
   0x0065, 0x0072, 0x0069, 0x0076, 0x0065, 0x0064, 0x0020, 0x0066, 0x0072, 0x006F,
   0x006D, 0x0020, 0x0043, 0x006F, 0x0072, 0x0065, 0x003A, 0x003A, 0x0047, 0x0072,
-  0x006F, 0x0075, 0x0070, 0x002E, 0x0000, 0xC557, 0x0054, 0x0072, 0x0079, 0x0069,
-  0x006E, 0x0067, 0x0020, 0x0074, 0x006F, 0x0020, 0x0063, 0x0061, 0x006E, 0x0063,
-  0x0065, 0x006C, 0x0020, 0x0061, 0x0020, 0x0074, 0x0061, 0x0073, 0x006B, 0x0020,
-  0x006E, 0x006F, 0x0074, 0x0020, 0x0062, 0x0065, 0x006C, 0x006F, 0x006E, 0x0067,
-  0x0069, 0x006E, 0x0067, 0x0020, 0x0074, 0x006F, 0x0020, 0x0074, 0x0068, 0x0069,
-  0x0073, 0x0020, 0x0071, 0x0075, 0x0065, 0x0075, 0x0065, 0x0021, 0x0000, 0xC557,
-  0x0054, 0x0072, 0x0079, 0x0069, 0x006E, 0x0067, 0x0020, 0x0074, 0x006F, 0x0020,
-  0x0065, 0x006E, 0x0071, 0x0075, 0x0065, 0x0075, 0x0065, 0x0020, 0x0061, 0x0020,
-  0x0074, 0x0061, 0x0073, 0x006B, 0x0020, 0x0074, 0x0077, 0x0069, 0x0063, 0x0065,
-  0x0021, 0x0000
+  0x006F, 0x0075, 0x0070, 0x002E, 0x0000
 };
 
 /* Constant values used in this 'C' module only. */
@@ -128,16 +114,15 @@ static const XRect _Const0001 = {{ 0, 0 }, { 0, 0 }};
 static const XStringRes _Const0002 = { _StringsDefault0, 0x0003 };
 static const XPoint _Const0003 = { 360, 360 };
 static const XStringRes _Const0004 = { _StringsDefault0, 0x002B };
-static const XStringRes _Const0005 = { _StringsDefault0, 0x003E };
-static const XStringRes _Const0006 = { _StringsDefault0, 0x0059 };
-static const XStringRes _Const0007 = { _StringsDefault0, 0x0069 };
-static const XColor _Const0008 = { 0x00, 0x00, 0x00, 0x00 };
-static const XStringRes _Const0009 = { _StringsDefault0, 0x0082 };
-static const XRect _Const000A = {{ -8, -8 }, { 9, 9 }};
-static const XRect _Const000B = {{ 0, 0 }, { 1, 1 }};
-static const XStringRes _Const000C = { _StringsDefault0, 0x00B4 };
-static const XStringRes _Const000D = { _StringsDefault0, 0x010A };
-static const XStringRes _Const000E = { _StringsDefault0, 0x0140 };
+static const XStringRes _Const0005 = { _StringsDefault0, 0x003F };
+static const XStringRes _Const0006 = { _StringsDefault0, 0x005A };
+static const XStringRes _Const0007 = { _StringsDefault0, 0x006D };
+static const XStringRes _Const0008 = { _StringsDefault0, 0x007D };
+static const XColor _Const0009 = { 0x00, 0x00, 0x00, 0x00 };
+static const XStringRes _Const000A = { _StringsDefault0, 0x0096 };
+static const XRect _Const000B = {{ -8, -8 }, { 9, 9 }};
+static const XRect _Const000C = {{ 0, 0 }, { 1, 1 }};
+static const XStringRes _Const000D = { _StringsDefault0, 0x00C8 };
 
 #ifndef EW_DONT_CHECK_INDEX
   /* This function is used to check the indices when accessing an array.
@@ -184,6 +169,7 @@ void CoreView__Init( CoreView _this, XObject aLink, XHandle aArg )
 
   /* ... and initialize objects, variables, properties, etc. */
   _this->viewState = CoreViewStateAlphaBlended | CoreViewStateFastReshape | CoreViewStateVisible;
+  _this->Layout = CoreLayoutAlignToLeft | CoreLayoutAlignToTop;
 }
 
 /* Re-Initializer for the class 'Core::View' */
@@ -201,6 +187,84 @@ void CoreView__Done( CoreView _this )
 
   /* Don't forget to deinitialize the super class ... */
   XObject__Done( &_this->_.Super );
+}
+
+/* 'C' function for method : 'Core::View.initLayoutContext()' */
+void CoreView_initLayoutContext( CoreView _this, XRect aBounds, CoreOutline aOutline )
+{
+  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
+  EW_UNUSED_ARG( _this );
+  EW_UNUSED_ARG( aOutline );
+  EW_UNUSED_ARG( aBounds );
+}
+
+/* Wrapper function for the virtual method : 'Core::View.initLayoutContext()' */
+void CoreView__initLayoutContext( void* _this, XRect aBounds, CoreOutline aOutline )
+{
+  ((CoreView)_this)->_.VMT->initLayoutContext((CoreView)_this, aBounds, aOutline );
+}
+
+/* 'C' function for method : 'Core::View.OnSetStackingPriority()' */
+void CoreView_OnSetStackingPriority( CoreView _this, XInt32 value )
+{
+  if ( _this->StackingPriority == value )
+    return;
+
+  _this->StackingPriority = value;
+
+  if ( _this->Owner != 0 )
+  {
+    CoreView sibling = _this->next;
+    XInt32 delta = 0;
+
+    while (( sibling != 0 ) && ( value > sibling->StackingPriority ))
+    {
+      sibling = sibling->next;
+      delta = delta + 1;
+    }
+
+    sibling = _this->prev;
+
+    while (( sibling != 0 ) && ( value < sibling->StackingPriority ))
+    {
+      sibling = sibling->prev;
+      delta = delta - 1;
+    }
+
+    if ( delta != 0 )
+      CoreGroup_Restack( _this->Owner, _this, delta );
+  }
+}
+
+/* 'C' function for method : 'Core::View.OnSetLayout()' */
+void CoreView_OnSetLayout( CoreView _this, XSet value )
+{
+  XSet delta = value ^ _this->Layout;
+
+  if ( !delta )
+    return;
+
+  _this->Layout = value;
+
+  if (( _this->layoutContext != 0 ) && !(( _this->viewState & CoreViewStateEmbedded ) 
+      == CoreViewStateEmbedded ))
+  {
+    _this->Owner->Super2.viewState = _this->Owner->Super2.viewState | ( CoreViewStatePendingLayout 
+    | CoreViewStateUpdateLayout );
+    EwPostSignal( EwNewSlot( _this->Owner, CoreGroup_updateComponentWithDelay ), 
+      ((XObject)_this ));
+    CoreGroup__InvalidateArea( _this->Owner, EwGetRectORect( _this->Owner->Super1.Bounds ));
+  }
+
+  if (( _this->layoutContext != 0 ) && (( _this->viewState & CoreViewStateEmbedded ) 
+      == CoreViewStateEmbedded ))
+  {
+    _this->layoutContext->outline->Super2.viewState = _this->layoutContext->outline->Super2.viewState 
+    | CoreViewStateUpdateLayout;
+    _this->Owner->Super2.viewState = _this->Owner->Super2.viewState | CoreViewStatePendingLayout;
+    EwPostSignal( EwNewSlot( _this->Owner, CoreGroup_updateComponentWithDelay ), 
+      ((XObject)_this ));
+  }
 }
 
 /* The method GetRoot() delivers the application object, this view belongs to. The 
@@ -587,6 +651,7 @@ EW_END_OF_CLASS_VARIANTS( CoreView )
 /* Virtual Method Table (VMT) for the class : 'Core::View' */
 EW_DEFINE_CLASS( CoreView, XObject, next, next, viewState, viewState, viewState, 
                  viewState, "Core::View" )
+  CoreView_initLayoutContext,
   CoreView_GetRoot,
   CoreView_Draw,
   CoreView_GetClipping,
@@ -631,40 +696,128 @@ void CoreQuadView__Done( CoreQuadView _this )
   CoreView__Done( &_this->_.Super );
 }
 
+/* 'C' function for method : 'Core::QuadView.initLayoutContext()' */
+void CoreQuadView_initLayoutContext( CoreQuadView _this, XRect aBounds, CoreOutline 
+  aOutline )
+{
+  CoreLayoutQuadContext context = EwNewObject( CoreLayoutQuadContext, 0 );
+
+  _this->Super1.layoutContext = 0;
+  context->Super1.extent = CoreView__GetExtent( _this );
+  context->Super1.bounds = aBounds;
+  context->Super1.outline = aOutline;
+  context->point1 = _this->Point1;
+  context->point2 = _this->Point2;
+  context->point3 = _this->Point3;
+  context->point4 = _this->Point4;
+  _this->Super1.layoutContext = ((CoreLayoutContext)context );
+}
+
 /* 'C' function for method : 'Core::QuadView.ArrangeView()' */
 XPoint CoreQuadView_ArrangeView( CoreQuadView _this, XRect aBounds, XEnum aFormation )
 {
+  XSet layout = _this->Super1.Layout;
   CoreLayoutQuadContext context = EwCastObject( _this->Super1.layoutContext, CoreLayoutQuadContext );
-  XInt32 x1 = 0;
-  XInt32 y1 = 0;
-  XInt32 x2 = 0;
-  XInt32 y2 = 0;
+  XInt32 x1 = context->Super1.extent.Point1.X;
+  XInt32 y1 = context->Super1.extent.Point1.Y;
+  XInt32 x2 = context->Super1.extent.Point2.X;
+  XInt32 y2 = context->Super1.extent.Point2.Y;
   XPoint dstSize = EwGetRectSize( aBounds );
-  XInt32 w;
-  XInt32 h;
+  XInt32 w = x2 - x1;
+  XInt32 h = y2 - y1;
+  XInt32 ex;
+  XInt32 ey;
+  XInt32 ew;
+  XInt32 eh;
 
   if ( aFormation == CoreFormationNone )
   {
-    if ( 0 != dstSize.X )
+    XPoint srcSize = EwGetRectSize( context->Super1.bounds );
+    x1 = x1 - context->Super1.bounds.Point1.X;
+    y1 = y1 - context->Super1.bounds.Point1.Y;
+
+    if ( srcSize.X != dstSize.X )
     {
-      x1 = aBounds.Point1.X;
-      x2 = x1;
+      XBool alignToLeft = (( layout & CoreLayoutAlignToLeft ) == CoreLayoutAlignToLeft );
+      XBool alignToRight = (( layout & CoreLayoutAlignToRight ) == CoreLayoutAlignToRight );
+      XBool resizeHorz = (( layout & CoreLayoutResizeHorz ) == CoreLayoutResizeHorz );
+
+      if ( !alignToLeft && ( resizeHorz || !alignToRight ))
+        x1 = ( x1 * dstSize.X ) / srcSize.X;
+
+      if ( !alignToRight && ( resizeHorz || !alignToLeft ))
+      {
+        x2 = x2 - context->Super1.bounds.Point1.X;
+        x2 = ( x2 * dstSize.X ) / srcSize.X;
+        x2 = x2 - dstSize.X;
+      }
+      else
+        x2 = x2 - context->Super1.bounds.Point2.X;
+
+      x1 = x1 + aBounds.Point1.X;
+      x2 = x2 + aBounds.Point2.X;
+
+      if ( !resizeHorz )
+      {
+        if ( alignToLeft && !alignToRight )
+          x2 = x1 + w;
+        else
+          if ( !alignToLeft && alignToRight )
+            x1 = x2 - w;
+          else
+          {
+            x1 = x1 + ((( x2 - x1 ) - w ) / 2 );
+            x2 = x1 + w;
+          }
+      }
     }
     else
     {
-      x1 = aBounds.Point1.X;
-      x2 = aBounds.Point2.X;
+      x2 = x2 - context->Super1.bounds.Point2.X;
+      x1 = x1 + aBounds.Point1.X;
+      x2 = x2 + aBounds.Point2.X;
     }
 
-    if ( 0 != dstSize.Y )
+    if ( srcSize.Y != dstSize.Y )
     {
-      y1 = aBounds.Point1.Y;
-      y2 = y1;
+      XBool alignToTop = (( layout & CoreLayoutAlignToTop ) == CoreLayoutAlignToTop );
+      XBool alignToBottom = (( layout & CoreLayoutAlignToBottom ) == CoreLayoutAlignToBottom );
+      XBool resizeVert = (( layout & CoreLayoutResizeVert ) == CoreLayoutResizeVert );
+
+      if ( !alignToTop && ( resizeVert || !alignToBottom ))
+        y1 = ( y1 * dstSize.Y ) / srcSize.Y;
+
+      if ( !alignToBottom && ( resizeVert || !alignToTop ))
+      {
+        y2 = y2 - context->Super1.bounds.Point1.Y;
+        y2 = ( y2 * dstSize.Y ) / srcSize.Y;
+        y2 = y2 - dstSize.Y;
+      }
+      else
+        y2 = y2 - context->Super1.bounds.Point2.Y;
+
+      y1 = y1 + aBounds.Point1.Y;
+      y2 = y2 + aBounds.Point2.Y;
+
+      if ( !resizeVert )
+      {
+        if ( alignToTop && !alignToBottom )
+          y2 = y1 + h;
+        else
+          if ( !alignToTop && alignToBottom )
+            y1 = y2 - h;
+          else
+          {
+            y1 = y1 + ((( y2 - y1 ) - h ) / 2 );
+            y2 = y1 + h;
+          }
+      }
     }
     else
     {
-      y1 = aBounds.Point1.Y;
-      y2 = aBounds.Point2.Y;
+      y2 = y2 - context->Super1.bounds.Point2.Y;
+      y1 = y1 + aBounds.Point1.Y;
+      y2 = y2 + aBounds.Point2.Y;
     }
   }
   else
@@ -674,28 +827,28 @@ XPoint CoreQuadView_ArrangeView( CoreQuadView _this, XRect aBounds, XEnum aForma
       case CoreFormationLeftToRight :
       {
         x1 = aBounds.Point1.X;
-        x2 = x1;
+        x2 = x1 + w;
       }
       break;
 
       case CoreFormationRightToLeft :
       {
         x2 = aBounds.Point2.X;
-        x1 = x2;
+        x1 = x2 - w;
       }
       break;
 
       case CoreFormationTopToBottom :
       {
         y1 = aBounds.Point1.Y;
-        y2 = y1;
+        y2 = y1 + h;
       }
       break;
 
       case CoreFormationBottomToTop :
       {
         y2 = aBounds.Point2.Y;
-        y1 = y2;
+        y1 = y2 - h;
       }
       break;
 
@@ -704,34 +857,100 @@ XPoint CoreQuadView_ArrangeView( CoreQuadView _this, XRect aBounds, XEnum aForma
 
     if (( aFormation == CoreFormationLeftToRight ) || ( aFormation == CoreFormationRightToLeft ))
     {
-      y1 = aBounds.Point1.Y;
-      y2 = y1;
+      XBool alignToTop = (( layout & CoreLayoutAlignToTop ) == CoreLayoutAlignToTop );
+      XBool alignToBottom = (( layout & CoreLayoutAlignToBottom ) == CoreLayoutAlignToBottom );
+      XBool resizeVert = (( layout & CoreLayoutResizeVert ) == CoreLayoutResizeVert );
+
+      if ( resizeVert )
+      {
+        y1 = aBounds.Point1.Y;
+        y2 = aBounds.Point2.Y;
+      }
+      else
+        if ( alignToTop && !alignToBottom )
+        {
+          y1 = aBounds.Point1.Y;
+          y2 = y1 + h;
+        }
+        else
+          if ( alignToBottom && !alignToTop )
+          {
+            y2 = aBounds.Point2.Y;
+            y1 = y2 - h;
+          }
+          else
+          {
+            y1 = aBounds.Point1.Y + (( EwGetRectH( aBounds ) - h ) / 2 );
+            y2 = y1 + h;
+          }
     }
 
     if (( aFormation == CoreFormationTopToBottom ) || ( aFormation == CoreFormationBottomToTop ))
     {
-      x1 = aBounds.Point1.X;
-      x2 = x1;
+      XBool alignToLeft = (( layout & CoreLayoutAlignToLeft ) == CoreLayoutAlignToLeft );
+      XBool alignToRight = (( layout & CoreLayoutAlignToRight ) == CoreLayoutAlignToRight );
+      XBool resizeHorz = (( layout & CoreLayoutResizeHorz ) == CoreLayoutResizeHorz );
+
+      if ( resizeHorz )
+      {
+        x1 = aBounds.Point1.X;
+        x2 = aBounds.Point2.X;
+      }
+      else
+        if ( alignToLeft && !alignToRight )
+        {
+          x1 = aBounds.Point1.X;
+          x2 = x1 + w;
+        }
+        else
+          if ( alignToRight && !alignToLeft )
+          {
+            x2 = aBounds.Point2.X;
+            x1 = x2 - w;
+          }
+          else
+          {
+            x1 = aBounds.Point1.X + (( EwGetRectW( aBounds ) - w ) / 2 );
+            x2 = x1 + w;
+          }
     }
   }
 
   context->Super1.isEmpty = (XBool)(( x1 >= x2 ) || ( y1 >= y2 ));
   w = ( x2 - x1 ) - 1;
   h = ( y2 - y1 ) - 1;
+  ex = context->Super1.extent.Point1.X;
+  ey = context->Super1.extent.Point1.Y;
+  ew = ( context->Super1.extent.Point2.X - ex ) - 1;
+  eh = ( context->Super1.extent.Point2.Y - ey ) - 1;
+
+  if ( ew == 0 )
+    ew = 1;
+
+  if ( eh == 0 )
+    eh = 1;
 
   if ((( _this->Super1.viewState & CoreViewStateFastReshape ) == CoreViewStateFastReshape ))
   {
-    _this->Point1 = EwNewPoint( x1, y1 );
-    _this->Point2 = EwNewPoint( x1, y1 );
-    _this->Point3 = EwNewPoint( x1, y1 );
-    _this->Point4 = EwNewPoint( x1, y1 );
+    _this->Point1 = EwNewPoint( x1 + ((( context->point1.X - ex ) * w ) / ew ), 
+    y1 + ((( context->point1.Y - ey ) * h ) / eh ));
+    _this->Point2 = EwNewPoint( x1 + ((( context->point2.X - ex ) * w ) / ew ), 
+    y1 + ((( context->point2.Y - ey ) * h ) / eh ));
+    _this->Point3 = EwNewPoint( x1 + ((( context->point3.X - ex ) * w ) / ew ), 
+    y1 + ((( context->point3.Y - ey ) * h ) / eh ));
+    _this->Point4 = EwNewPoint( x1 + ((( context->point4.X - ex ) * w ) / ew ), 
+    y1 + ((( context->point4.Y - ey ) * h ) / eh ));
   }
   else
   {
-    CoreQuadView_OnSetPoint1( _this, EwNewPoint( x1, y1 ));
-    CoreQuadView_OnSetPoint2( _this, EwNewPoint( x1, y1 ));
-    CoreQuadView_OnSetPoint3( _this, EwNewPoint( x1, y1 ));
-    CoreQuadView_OnSetPoint4( _this, EwNewPoint( x1, y1 ));
+    CoreQuadView_OnSetPoint1( _this, EwNewPoint( x1 + ((( context->point1.X - ex ) 
+    * w ) / ew ), y1 + ((( context->point1.Y - ey ) * h ) / eh )));
+    CoreQuadView_OnSetPoint2( _this, EwNewPoint( x1 + ((( context->point2.X - ex ) 
+    * w ) / ew ), y1 + ((( context->point2.Y - ey ) * h ) / eh )));
+    CoreQuadView_OnSetPoint3( _this, EwNewPoint( x1 + ((( context->point3.X - ex ) 
+    * w ) / ew ), y1 + ((( context->point3.Y - ey ) * h ) / eh )));
+    CoreQuadView_OnSetPoint4( _this, EwNewPoint( x1 + ((( context->point4.X - ex ) 
+    * w ) / ew ), y1 + ((( context->point4.Y - ey ) * h ) / eh )));
     _this->Super1.layoutContext = ((CoreLayoutContext)context );
   }
 
@@ -1023,6 +1242,7 @@ EW_END_OF_CLASS_VARIANTS( CoreQuadView )
 /* Virtual Method Table (VMT) for the class : 'Core::QuadView' */
 EW_DEFINE_CLASS( CoreQuadView, CoreView, _.VMT, _.VMT, _.VMT, _.VMT, _.VMT, _.VMT, 
                  "Core::QuadView" )
+  CoreQuadView_initLayoutContext,
   CoreView_GetRoot,
   CoreView_Draw,
   CoreView_GetClipping,
@@ -1067,38 +1287,119 @@ void CoreRectView__Done( CoreRectView _this )
   CoreView__Done( &_this->_.Super );
 }
 
+/* 'C' function for method : 'Core::RectView.initLayoutContext()' */
+void CoreRectView_initLayoutContext( CoreRectView _this, XRect aBounds, CoreOutline 
+  aOutline )
+{
+  CoreLayoutContext context = EwNewObject( CoreLayoutContext, 0 );
+
+  context->extent = _this->Bounds;
+  context->bounds = aBounds;
+  context->outline = aOutline;
+  _this->Super1.layoutContext = context;
+}
+
 /* 'C' function for method : 'Core::RectView.ArrangeView()' */
 XPoint CoreRectView_ArrangeView( CoreRectView _this, XRect aBounds, XEnum aFormation )
 {
+  XSet layout = _this->Super1.Layout;
   CoreLayoutContext context = _this->Super1.layoutContext;
-  XInt32 x1 = 0;
-  XInt32 y1 = 0;
-  XInt32 x2 = 0;
-  XInt32 y2 = 0;
+  XInt32 x1 = context->extent.Point1.X;
+  XInt32 y1 = context->extent.Point1.Y;
+  XInt32 x2 = context->extent.Point2.X;
+  XInt32 y2 = context->extent.Point2.Y;
   XPoint dstSize = EwGetRectSize( aBounds );
+  XInt32 w = x2 - x1;
+  XInt32 h = y2 - y1;
 
   if ( aFormation == CoreFormationNone )
   {
-    if ( 0 != dstSize.X )
+    XPoint srcSize = EwGetRectSize( context->bounds );
+    x1 = x1 - context->bounds.Point1.X;
+    y1 = y1 - context->bounds.Point1.Y;
+
+    if ( srcSize.X != dstSize.X )
     {
-      x1 = aBounds.Point1.X;
-      x2 = x1;
+      XBool alignToLeft = (( layout & CoreLayoutAlignToLeft ) == CoreLayoutAlignToLeft );
+      XBool alignToRight = (( layout & CoreLayoutAlignToRight ) == CoreLayoutAlignToRight );
+      XBool resizeHorz = (( layout & CoreLayoutResizeHorz ) == CoreLayoutResizeHorz );
+
+      if ( !alignToLeft && ( resizeHorz || !alignToRight ))
+        x1 = ( x1 * dstSize.X ) / srcSize.X;
+
+      if ( !alignToRight && ( resizeHorz || !alignToLeft ))
+      {
+        x2 = x2 - context->bounds.Point1.X;
+        x2 = ( x2 * dstSize.X ) / srcSize.X;
+        x2 = x2 - dstSize.X;
+      }
+      else
+        x2 = x2 - context->bounds.Point2.X;
+
+      x1 = x1 + aBounds.Point1.X;
+      x2 = x2 + aBounds.Point2.X;
+
+      if ( !resizeHorz )
+      {
+        if ( alignToLeft && !alignToRight )
+          x2 = x1 + w;
+        else
+          if ( !alignToLeft && alignToRight )
+            x1 = x2 - w;
+          else
+          {
+            x1 = x1 + ((( x2 - x1 ) - w ) / 2 );
+            x2 = x1 + w;
+          }
+      }
     }
     else
     {
-      x1 = aBounds.Point1.X;
-      x2 = aBounds.Point2.X;
+      x2 = x2 - context->bounds.Point2.X;
+      x1 = x1 + aBounds.Point1.X;
+      x2 = x2 + aBounds.Point2.X;
     }
 
-    if ( 0 != dstSize.Y )
+    if ( srcSize.Y != dstSize.Y )
     {
-      y1 = aBounds.Point1.Y;
-      y2 = y1;
+      XBool alignToTop = (( layout & CoreLayoutAlignToTop ) == CoreLayoutAlignToTop );
+      XBool alignToBottom = (( layout & CoreLayoutAlignToBottom ) == CoreLayoutAlignToBottom );
+      XBool resizeVert = (( layout & CoreLayoutResizeVert ) == CoreLayoutResizeVert );
+
+      if ( !alignToTop && ( resizeVert || !alignToBottom ))
+        y1 = ( y1 * dstSize.Y ) / srcSize.Y;
+
+      if ( !alignToBottom && ( resizeVert || !alignToTop ))
+      {
+        y2 = y2 - context->bounds.Point1.Y;
+        y2 = ( y2 * dstSize.Y ) / srcSize.Y;
+        y2 = y2 - dstSize.Y;
+      }
+      else
+        y2 = y2 - context->bounds.Point2.Y;
+
+      y1 = y1 + aBounds.Point1.Y;
+      y2 = y2 + aBounds.Point2.Y;
+
+      if ( !resizeVert )
+      {
+        if ( alignToTop && !alignToBottom )
+          y2 = y1 + h;
+        else
+          if ( !alignToTop && alignToBottom )
+            y1 = y2 - h;
+          else
+          {
+            y1 = y1 + ((( y2 - y1 ) - h ) / 2 );
+            y2 = y1 + h;
+          }
+      }
     }
     else
     {
-      y1 = aBounds.Point1.Y;
-      y2 = aBounds.Point2.Y;
+      y2 = y2 - context->bounds.Point2.Y;
+      y1 = y1 + aBounds.Point1.Y;
+      y2 = y2 + aBounds.Point2.Y;
     }
   }
   else
@@ -1108,28 +1409,28 @@ XPoint CoreRectView_ArrangeView( CoreRectView _this, XRect aBounds, XEnum aForma
       case CoreFormationLeftToRight :
       {
         x1 = aBounds.Point1.X;
-        x2 = x1;
+        x2 = x1 + w;
       }
       break;
 
       case CoreFormationRightToLeft :
       {
         x2 = aBounds.Point2.X;
-        x1 = x2;
+        x1 = x2 - w;
       }
       break;
 
       case CoreFormationTopToBottom :
       {
         y1 = aBounds.Point1.Y;
-        y2 = y1;
+        y2 = y1 + h;
       }
       break;
 
       case CoreFormationBottomToTop :
       {
         y2 = aBounds.Point2.Y;
-        y1 = y2;
+        y1 = y2 - h;
       }
       break;
 
@@ -1138,14 +1439,62 @@ XPoint CoreRectView_ArrangeView( CoreRectView _this, XRect aBounds, XEnum aForma
 
     if (( aFormation == CoreFormationLeftToRight ) || ( aFormation == CoreFormationRightToLeft ))
     {
-      y1 = aBounds.Point1.Y;
-      y2 = y1;
+      XBool alignToTop = (( layout & CoreLayoutAlignToTop ) == CoreLayoutAlignToTop );
+      XBool alignToBottom = (( layout & CoreLayoutAlignToBottom ) == CoreLayoutAlignToBottom );
+      XBool resizeVert = (( layout & CoreLayoutResizeVert ) == CoreLayoutResizeVert );
+
+      if ( resizeVert )
+      {
+        y1 = aBounds.Point1.Y;
+        y2 = aBounds.Point2.Y;
+      }
+      else
+        if ( alignToTop && !alignToBottom )
+        {
+          y1 = aBounds.Point1.Y;
+          y2 = y1 + h;
+        }
+        else
+          if ( alignToBottom && !alignToTop )
+          {
+            y2 = aBounds.Point2.Y;
+            y1 = y2 - h;
+          }
+          else
+          {
+            y1 = aBounds.Point1.Y + (( EwGetRectH( aBounds ) - h ) / 2 );
+            y2 = y1 + h;
+          }
     }
 
     if (( aFormation == CoreFormationTopToBottom ) || ( aFormation == CoreFormationBottomToTop ))
     {
-      x1 = aBounds.Point1.X;
-      x2 = x1;
+      XBool alignToLeft = (( layout & CoreLayoutAlignToLeft ) == CoreLayoutAlignToLeft );
+      XBool alignToRight = (( layout & CoreLayoutAlignToRight ) == CoreLayoutAlignToRight );
+      XBool resizeHorz = (( layout & CoreLayoutResizeHorz ) == CoreLayoutResizeHorz );
+
+      if ( resizeHorz )
+      {
+        x1 = aBounds.Point1.X;
+        x2 = aBounds.Point2.X;
+      }
+      else
+        if ( alignToLeft && !alignToRight )
+        {
+          x1 = aBounds.Point1.X;
+          x2 = x1 + w;
+        }
+        else
+          if ( alignToRight && !alignToLeft )
+          {
+            x2 = aBounds.Point2.X;
+            x1 = x2 - w;
+          }
+          else
+          {
+            x1 = aBounds.Point1.X + (( EwGetRectW( aBounds ) - w ) / 2 );
+            x2 = x1 + w;
+          }
     }
   }
 
@@ -1231,6 +1580,7 @@ EW_END_OF_CLASS_VARIANTS( CoreRectView )
 /* Virtual Method Table (VMT) for the class : 'Core::RectView' */
 EW_DEFINE_CLASS( CoreRectView, CoreView, _.VMT, _.VMT, _.VMT, _.VMT, _.VMT, _.VMT, 
                  "Core::RectView" )
+  CoreRectView_initLayoutContext,
   CoreView_GetRoot,
   CoreView_Draw,
   CoreView_GetClipping,
@@ -1591,10 +1941,18 @@ void CoreGroup_OnSetBounds( CoreGroup _this, XRect value )
 
   if (( resize && ( oldSize.X > 0 )) && ( oldSize.Y > 0 ))
   {
+    XRect bounds = EwNewRect2Point( _Const0000, oldSize );
     CoreView view = _this->first;
 
     while ( view != 0 )
+    {
+      if ((( view->layoutContext == 0 ) && ( view->Layout != ( CoreLayoutAlignToLeft 
+          | CoreLayoutAlignToTop ))) && !(( view->viewState & CoreViewStateEmbedded ) 
+          == CoreViewStateEmbedded ))
+        CoreView__initLayoutContext( view, bounds, 0 );
+
       view = view->next;
+    }
   }
 
   if ( resize )
@@ -1614,7 +1972,8 @@ XObject CoreGroup_processKeyHandlers( CoreGroup _this, CoreEvent aEvent )
   if ( keyEvent == 0 )
     return 0;
 
-  while (( handler != 0 ) && !CoreKeyPressHandler_HandleEvent( handler, keyEvent ))
+  while (( handler != 0 ) && ( !handler->Enabled || !CoreKeyPressHandler_HandleEvent( 
+         handler, keyEvent )))
     handler = handler->next;
 
   return ((XObject)handler );
@@ -1712,9 +2071,15 @@ void CoreGroup_recalculateLayout( CoreGroup _this )
 
   while ( view != 0 )
   {
-    if ((( view->viewState & CoreViewStateEmbedded ) == CoreViewStateEmbedded ) 
-        && (( view->layoutContext != 0 ) && ( 0 != form )))
-      view->layoutContext = 0;
+    if ((( view->viewState & CoreViewStateEmbedded ) == CoreViewStateEmbedded ))
+    {
+      if (( view->layoutContext != 0 ) && ( view->layoutContext->outline != form ))
+        view->layoutContext = 0;
+
+      if ((( view->layoutContext == 0 ) && formLayout ) && ( view->Layout != ( CoreLayoutAlignToLeft 
+          | CoreLayoutAlignToTop )))
+        CoreView__initLayoutContext( view, formBounds2, form );
+    }
 
     if ( view->layoutContext != 0 )
     {
@@ -1745,7 +2110,7 @@ void CoreGroup_recalculateLayout( CoreGroup _this )
   }
 
   _this->Super2.viewState = _this->Super2.viewState & ~CoreViewStateUpdatingLayout;
-  CoreGroup_UpdateLayout( _this, EwGetRectSize( groupBounds ));
+  CoreGroup__UpdateLayout( _this, EwGetRectSize( groupBounds ));
 }
 
 /* 'C' function for method : 'Core::Group.updateComponentWithDelay()' */
@@ -1777,7 +2142,7 @@ void CoreGroup_updateComponent( CoreGroup _this, XObject sender )
       || updateLayout )
   {
     _this->Super2.viewState = _this->Super2.viewState & ~CoreViewStatePendingViewState;
-    CoreGroup_UpdateViewState( _this, _this->Super2.viewState );
+    CoreGroup__UpdateViewState( _this, _this->Super2.viewState );
   }
 }
 
@@ -2244,6 +2609,12 @@ void CoreGroup_UpdateLayout( CoreGroup _this, XPoint aSize )
   EW_UNUSED_ARG( aSize );
 }
 
+/* Wrapper function for the virtual method : 'Core::Group.UpdateLayout()' */
+void CoreGroup__UpdateLayout( void* _this, XPoint aSize )
+{
+  ((CoreGroup)_this)->_.VMT->UpdateLayout((CoreGroup)_this, aSize );
+}
+
 /* The method UpdateViewState() is invoked automatically after the state of the 
    component has been changed. This method can be overridden and filled with logic 
    to ensure the visual aspect of the component does reflect its current state. 
@@ -2263,6 +2634,12 @@ void CoreGroup_UpdateViewState( CoreGroup _this, XSet aState )
   /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
   EW_UNUSED_ARG( _this );
   EW_UNUSED_ARG( aState );
+}
+
+/* Wrapper function for the virtual method : 'Core::Group.UpdateViewState()' */
+void CoreGroup__UpdateViewState( void* _this, XSet aState )
+{
+  ((CoreGroup)_this)->_.VMT->UpdateViewState((CoreGroup)_this, aState );
 }
 
 /* The method InvalidateViewState() declares the state of this component as changed, 
@@ -2360,6 +2737,122 @@ CoreView CoreGroup_FindSiblingView( CoreGroup _this, CoreView aView, XSet aFilte
   return 0;
 }
 
+/* The method Restack() changes the Z-order of views in the component. Depending 
+   on the parameter aOrder the method will elevate or lower the given view aView. 
+   If aOrder is negative, the view will be lowered to the background. If aOrder 
+   is positive, the view will be elevated to the foreground. If aOrder == 0, no 
+   modification will take place.
+   The absolute value of aOrder determines the maximum number of sibling views the 
+   view has to skip over in order to reach its new Z-order. The effective stacking 
+   position of the view can additionally be affected by the value of the view's 
+   property @StackingPriority. Concrete, the view is prevented from being arranged 
+   in front of any sibling view configured with a higher @StackingPriority value. 
+   Similarly the view can't be arranged behind any sibling view having lower @StackingPriority 
+   value.
+   Please note, changing the Z-order of views within a component containing a Core::Outline 
+   view can cause this outline to update its automatic row or column formation. */
+void CoreGroup_Restack( CoreGroup _this, CoreView aView, XInt32 aOrder )
+{
+  CoreView after;
+  CoreView before;
+  XInt32 sg;
+
+  if ( aView == 0 )
+  {
+    EwThrow( EwLoadString( &_Const0004 ));
+    return;
+  }
+
+  if ( aView->Owner != _this )
+  {
+    EwThrow( EwLoadString( &_Const0005 ));
+    return;
+  }
+
+  after = aView;
+  before = aView;
+  sg = aView->StackingPriority;
+
+  while ((( aOrder > 0 ) && ( after->next != 0 )) && ( after->next->StackingPriority 
+         <= sg ))
+  {
+    after = after->next;
+    aOrder = aOrder - 1;
+  }
+
+  while ((( aOrder < 0 ) && ( before->prev != 0 )) && ( before->prev->StackingPriority 
+         >= sg ))
+  {
+    before = before->prev;
+    aOrder = aOrder + 1;
+  }
+
+  if (( after == aView ) && ( before == aView ))
+    return;
+
+  if ((( aView->viewState & ( CoreViewStateEmbedded | CoreViewStateVisible )) == 
+      ( CoreViewStateEmbedded | CoreViewStateVisible )))
+  {
+    if (( aView->prev != 0 ) && ( aView->layoutContext != 0 ))
+      aView->prev->viewState = aView->prev->viewState | CoreViewStateRequestLayout;
+
+    aView->viewState = aView->viewState | CoreViewStateRequestLayout;
+    _this->Super2.viewState = _this->Super2.viewState | CoreViewStatePendingLayout;
+    EwPostSignal( EwNewSlot( _this, CoreGroup_updateComponentWithDelay ), ((XObject)_this ));
+  }
+
+  if ((( aView->viewState & CoreViewStateIsOutline ) == CoreViewStateIsOutline ))
+  {
+    if ( aView->prev != 0 )
+      aView->prev->viewState = aView->prev->viewState | CoreViewStateRequestLayout;
+
+    aView->viewState = aView->viewState | CoreViewStateRequestLayout;
+    _this->Super2.viewState = _this->Super2.viewState | CoreViewStatePendingLayout;
+    EwPostSignal( EwNewSlot( _this, CoreGroup_updateComponentWithDelay ), ((XObject)_this ));
+  }
+
+  if ( aView->prev != 0 )
+    aView->prev->next = aView->next;
+
+  if ( aView->next != 0 )
+    aView->next->prev = aView->prev;
+
+  if ( _this->first == aView )
+    _this->first = aView->next;
+
+  if ( _this->last == aView )
+    _this->last = aView->prev;
+
+  if ( after != aView )
+  {
+    aView->next = after->next;
+    aView->prev = after;
+    after->next = aView;
+
+    if ( aView->next != 0 )
+      aView->next->prev = aView;
+  }
+
+  if ( before != aView )
+  {
+    aView->next = before;
+    aView->prev = before->prev;
+    before->prev = aView;
+
+    if ( aView->prev != 0 )
+      aView->prev->next = aView;
+  }
+
+  if ( aView->next == 0 )
+    _this->last = aView;
+
+  if ( aView->prev == 0 )
+    _this->first = aView;
+
+  if ((( aView->viewState & CoreViewStateVisible ) == CoreViewStateVisible ))
+    CoreGroup__InvalidateArea( _this, CoreView__GetClipping( aView ));
+}
+
 /* The method Remove() removes the given view aView from the component. After this 
    operation the view doesn't belong anymore to the component - the view is not 
    visible and it can't receive any events.
@@ -2372,7 +2865,7 @@ void CoreGroup_Remove( CoreGroup _this, CoreView aView )
 {
   if ( aView == 0 )
   {
-    EwThrow( EwLoadString( &_Const0004 ));
+    EwThrow( EwLoadString( &_Const0006 ));
     return;
   }
 
@@ -2448,32 +2941,44 @@ void CoreGroup_Remove( CoreGroup _this, CoreView aView )
 void CoreGroup_Add( CoreGroup _this, CoreView aView, XInt32 aOrder )
 {
   CoreView before;
+  XInt32 sg;
 
   if ( aView == 0 )
-  {
-    EwThrow( EwLoadString( &_Const0006 ));
-    return;
-  }
-
-  if ( aView->Owner != 0 )
   {
     EwThrow( EwLoadString( &_Const0007 ));
     return;
   }
 
-  before = 0;
+  if ( aView->Owner != 0 )
+  {
+    EwThrow( EwLoadString( &_Const0008 ));
+    return;
+  }
 
-  if (( aOrder < 0 ) && ( _this->last != 0 ))
+  before = 0;
+  sg = aView->StackingPriority;
+
+  if ((( aOrder < 0 ) && ( _this->last != 0 )) && ( _this->last->StackingPriority 
+      >= sg ))
   {
     before = _this->last;
     aOrder = aOrder + 1;
   }
 
-  while ((( aOrder < 0 ) && ( before != 0 )) && ( before->prev != 0 ))
+  while (((( aOrder < 0 ) && ( before != 0 )) && ( before->prev != 0 )) && ( before->prev->StackingPriority 
+         >= sg ))
   {
     before = before->prev;
     aOrder = aOrder + 1;
   }
+
+  if ((( before == 0 ) && ( _this->last != 0 )) && ( _this->last->StackingPriority 
+      > sg ))
+    before = _this->last;
+
+  while ((( before != 0 ) && ( before->prev != 0 )) && ( before->prev->StackingPriority 
+         > sg ))
+    before = before->prev;
 
   if ( before == 0 )
   {
@@ -2547,6 +3052,7 @@ EW_END_OF_CLASS_VARIANTS( CoreGroup )
 /* Virtual Method Table (VMT) for the class : 'Core::Group' */
 EW_DEFINE_CLASS( CoreGroup, CoreRectView, first, first, extClipLeft, extClipLeft, 
                  extClipLeft, extClipLeft, "Core::Group" )
+  CoreRectView_initLayoutContext,
   CoreView_GetRoot,
   CoreGroup_Draw,
   CoreGroup_GetClipping,
@@ -2561,6 +3067,8 @@ EW_DEFINE_CLASS( CoreGroup, CoreRectView, first, first, extClipLeft, extClipLeft
   CoreGroup_OnSetFocus,
   CoreGroup_DispatchEvent,
   CoreGroup_BroadcastEvent,
+  CoreGroup_UpdateLayout,
+  CoreGroup_UpdateViewState,
   CoreGroup_InvalidateArea,
 EW_END_OF_CLASS( CoreGroup )
 
@@ -2649,8 +3157,8 @@ void CoreRoot_Draw( CoreRoot _this, GraphicsCanvas aCanvas, XRect aClip, XPoint
 
   if ( !fullScreenUpdate )
     GraphicsCanvas_FillRectangle( aCanvas, aClip, EwMoveRectPos( EwMoveRectPos( 
-    aClip, aOffset ), _this->Super2.Bounds.Point1 ), _Const0008, _Const0008, _Const0008, 
-    _Const0008, 0 );
+    aClip, aOffset ), _this->Super2.Bounds.Point1 ), _Const0009, _Const0009, _Const0009, 
+    _Const0009, 0 );
 
   CoreGroup_Draw((CoreGroup)_this, aCanvas, aClip, aOffset, aOpacity, aBlend );
 }
@@ -2760,7 +3268,7 @@ void CoreRoot_InvalidateArea( CoreRoot _this, XRect aArea )
 
   if ( _this->updateLock > 0 )
   {
-    EwThrow( EwLoadString( &_Const0009 ));
+    EwThrow( EwLoadString( &_Const000A ));
     return;
   }
 
@@ -3545,10 +4053,10 @@ XBool CoreRoot_DriveMultiTouchHitting( CoreRoot _this, XBool aDown, XInt32 aFing
     else
       _this->cursorSequelCounter[ EwCheckIndex( aFinger, 10 )] = 0;
 
-    _this->cursorSequelArea[ EwCheckIndex( aFinger, 10 )] = EwMoveRectPos( _Const000A, 
+    _this->cursorSequelArea[ EwCheckIndex( aFinger, 10 )] = EwMoveRectPos( _Const000B, 
     aPos );
     _this->cursorHittingTime[ EwCheckIndex( aFinger, 10 )] = ticksCount;
-    hit = CoreView__CursorHitTest( _this, EwMoveRectPos( _Const000A, aPos ), aFinger, 
+    hit = CoreView__CursorHitTest( _this, EwMoveRectPos( _Const000B, aPos ), aFinger, 
     _this->cursorSequelCounter[ EwCheckIndex( aFinger, 10 )] + 1, 0, 0, 0 );
 
     if ( hit != 0 )
@@ -3678,7 +4186,7 @@ CoreView CoreRoot_RetargetCursorWithReason( CoreRoot _this, CoreView aNewTarget,
   if ( _this->cursorTargetView[ EwCheckIndex( _this->cursorFinger, 10 )] == 0 )
     return 0;
 
-  hit = CoreView__CursorHitTest( _this, EwMoveRectPos( _Const000A, _this->cursorLastPos[ 
+  hit = CoreView__CursorHitTest( _this, EwMoveRectPos( _Const000B, _this->cursorLastPos[ 
   EwCheckIndex( _this->cursorFinger, 10 )]), _this->cursorFinger, 1, aNewTarget, 
   aStartView, aRetargetReason );
 
@@ -3804,6 +4312,7 @@ EW_END_OF_CLASS_VARIANTS( CoreRoot )
 /* Virtual Method Table (VMT) for the class : 'Core::Root' */
 EW_DEFINE_CLASS( CoreRoot, CoreGroup, cursorHoldTimer, keyLastTarget, keyLastCode, 
                  keyLastCode, keyLastCode, keyLastCode, "Core::Root" )
+  CoreRectView_initLayoutContext,
   CoreRoot_GetRoot,
   CoreRoot_Draw,
   CoreGroup_GetClipping,
@@ -3818,6 +4327,8 @@ EW_DEFINE_CLASS( CoreRoot, CoreGroup, cursorHoldTimer, keyLastTarget, keyLastCod
   CoreRoot_OnSetFocus,
   CoreRoot_DispatchEvent,
   CoreRoot_BroadcastEvent,
+  CoreGroup_UpdateLayout,
+  CoreGroup_UpdateViewState,
   CoreRoot_InvalidateArea,
 EW_END_OF_CLASS( CoreRoot )
 
@@ -4564,13 +5075,20 @@ void CoreOutline_OnSetBounds( CoreOutline _this, XRect value )
 
   if (( resize && ( oldSize.X > 0 )) && ( oldSize.Y > 0 ))
   {
+    XRect bounds = _this->Super1.Bounds;
     CoreView view = _this->Super2.next;
 
     while (( view != 0 ) && !(( view->viewState & CoreViewStateIsOutline ) == CoreViewStateIsOutline ))
     {
-      if ((( view->viewState & CoreViewStateEmbedded ) == CoreViewStateEmbedded ) 
-          && (( view->layoutContext != 0 ) && ( 0 != _this )))
-        view->layoutContext = 0;
+      if ((( view->viewState & CoreViewStateEmbedded ) == CoreViewStateEmbedded ))
+      {
+        if (( view->layoutContext != 0 ) && ( view->layoutContext->outline != _this ))
+          view->layoutContext = 0;
+
+        if (( view->layoutContext == 0 ) && ( view->Layout != ( CoreLayoutAlignToLeft 
+            | CoreLayoutAlignToTop )))
+          CoreView__initLayoutContext( view, bounds, _this );
+      }
 
       view = view->next;
     }
@@ -4600,6 +5118,7 @@ EW_END_OF_CLASS_VARIANTS( CoreOutline )
 /* Virtual Method Table (VMT) for the class : 'Core::Outline' */
 EW_DEFINE_CLASS( CoreOutline, CoreRectView, _.VMT, _.VMT, _.VMT, _.VMT, _.VMT, _.VMT, 
                  "Core::Outline" )
+  CoreRectView_initLayoutContext,
   CoreView_GetRoot,
   CoreOutline_Draw,
   CoreOutline_GetClipping,
@@ -4628,6 +5147,8 @@ void CoreSimpleTouchHandler__Init( CoreSimpleTouchHandler _this, XObject aLink, 
   /* ... and initialize objects, variables, properties, etc. */
   _this->Super2.viewState = CoreViewStateAlphaBlended | CoreViewStateEnabled | CoreViewStateFastReshape 
   | CoreViewStatePreEnabled | CoreViewStateTouchable | CoreViewStateVisible;
+  _this->RetargetOffset = 8;
+  _this->MaxStrikeCount = 1;
 }
 
 /* Re-Initializer for the class 'Core::SimpleTouchHandler' */
@@ -4747,7 +5268,7 @@ XObject CoreSimpleTouchHandler_HandleEvent( CoreSimpleTouchHandler _this, CoreEv
     if ( root != 0 )
     {
       CoreView startView = (( _this->Super2.prev != 0 )? _this->Super2.prev : ((CoreView)_this->Super2.Owner ));
-      hit = CoreView__CursorHitTest( root, EwMoveRectPos( _Const000B, event1->GlobalCurrentPos ), 
+      hit = CoreView__CursorHitTest( root, EwMoveRectPos( _Const000C, event1->GlobalCurrentPos ), 
       event1->Finger, event1->StrikeCount, 0, startView, 0 );
     }
 
@@ -4854,11 +5375,17 @@ XObject CoreSimpleTouchHandler_HandleEvent( CoreSimpleTouchHandler _this, CoreEv
     EwSignal( _this->OnPress, ((XObject)_this ));
 
   if (( _this->Down && _this->Inside ) && !inside )
+  {
     _this->entered = 1;
+    EwSignal( _this->OnEnter, ((XObject)_this ));
+  }
 
   if ( _this->entered && ((( down && !_this->Inside ) && inside ) || (( !down && 
       _this->Inside ) && inside )))
+  {
     _this->entered = 0;
+    EwSignal( _this->OnLeave, ((XObject)_this ));
+  }
 
   if (( event1 != 0 ) && !down )
     EwSignal( _this->OnRelease, ((XObject)_this ));
@@ -4911,7 +5438,7 @@ CoreCursorHit CoreSimpleTouchHandler_CursorHitTest( CoreSimpleTouchHandler _this
   if (( aDedicatedView != 0 ) && ( aDedicatedView != (CoreView)_this ))
     return 0;
 
-  if (( aStrikeCount < 1 ) || ( aStrikeCount > 1 ))
+  if (( aStrikeCount < 1 ) || ( aStrikeCount > _this->MaxStrikeCount ))
     return 0;
 
   if ( _this->state >= 33554432 )
@@ -4974,13 +5501,43 @@ CoreCursorHit CoreSimpleTouchHandler_CursorHitTest( CoreSimpleTouchHandler _this
   return 0;
 }
 
+/* 'C' function for method : 'Core::SimpleTouchHandler.OnSetRetargetOffset()' */
+void CoreSimpleTouchHandler_OnSetRetargetOffset( CoreSimpleTouchHandler _this, XInt32 
+  value )
+{
+  if ( value < 1 )
+    value = 1;
+
+  _this->RetargetOffset = value;
+}
+
+/* 'C' function for method : 'Core::SimpleTouchHandler.OnSetMaxStrikeCount()' */
+void CoreSimpleTouchHandler_OnSetMaxStrikeCount( CoreSimpleTouchHandler _this, XInt32 
+  value )
+{
+  if ( value < 1 )
+    value = 1;
+
+  _this->MaxStrikeCount = value;
+}
+
+/* 'C' function for method : 'Core::SimpleTouchHandler.OnSetEnabled()' */
+void CoreSimpleTouchHandler_OnSetEnabled( CoreSimpleTouchHandler _this, XBool value )
+{
+  if ( value )
+    CoreView__ChangeViewState( _this, CoreViewStatePreEnabled, 0 );
+  else
+    CoreView__ChangeViewState( _this, 0, CoreViewStatePreEnabled );
+}
+
 /* Variants derived from the class : 'Core::SimpleTouchHandler' */
 EW_DEFINE_CLASS_VARIANTS( CoreSimpleTouchHandler )
 EW_END_OF_CLASS_VARIANTS( CoreSimpleTouchHandler )
 
 /* Virtual Method Table (VMT) for the class : 'Core::SimpleTouchHandler' */
-EW_DEFINE_CLASS( CoreSimpleTouchHandler, CoreQuadView, OnRelease, OnRelease, OnRelease, 
+EW_DEFINE_CLASS( CoreSimpleTouchHandler, CoreQuadView, OnLeave, OnLeave, OnLeave, 
                  state, state, state, "Core::SimpleTouchHandler" )
+  CoreQuadView_initLayoutContext,
   CoreView_GetRoot,
   CoreSimpleTouchHandler_Draw,
   CoreView_GetClipping,
@@ -4992,401 +5549,6 @@ EW_DEFINE_CLASS( CoreSimpleTouchHandler, CoreQuadView, OnRelease, OnRelease, OnR
   CoreQuadView_GetExtent,
   CoreView_ChangeViewState,
 EW_END_OF_CLASS( CoreSimpleTouchHandler )
-
-/* Initializer for the class 'Core::RotateTouchHandler' */
-void CoreRotateTouchHandler__Init( CoreRotateTouchHandler _this, XObject aLink, XHandle aArg )
-{
-  /* At first initialize the super class ... */
-  CoreRectView__Init( &_this->_.Super, aLink, aArg );
-
-  /* Allow the Immediate Garbage Collection to evalute the members of this class. */
-  _this->_.XObject._.GCT = EW_CLASS_GCT( CoreRotateTouchHandler );
-
-  /* Setup the VMT pointer */
-  _this->_.VMT = EW_CLASS( CoreRotateTouchHandler );
-
-  /* ... and initialize objects, variables, properties, etc. */
-  _this->Super2.viewState = CoreViewStateAlphaBlended | CoreViewStateEnabled | CoreViewStateFastReshape 
-  | CoreViewStatePreEnabled | CoreViewStateTouchable | CoreViewStateVisible;
-}
-
-/* Re-Initializer for the class 'Core::RotateTouchHandler' */
-void CoreRotateTouchHandler__ReInit( CoreRotateTouchHandler _this )
-{
-  /* At first re-initialize the super class ... */
-  CoreRectView__ReInit( &_this->_.Super );
-}
-
-/* Finalizer method for the class 'Core::RotateTouchHandler' */
-void CoreRotateTouchHandler__Done( CoreRotateTouchHandler _this )
-{
-  /* Finalize this class */
-  _this->_.Super._.VMT = EW_CLASS( CoreRectView );
-
-  /* Don't forget to deinitialize the super class ... */
-  CoreRectView__Done( &_this->_.Super );
-}
-
-/* The method Draw() is invoked automatically if parts of the view should be redrawn 
-   on the screen. This can occur when e.g. the view has been moved or the appearance 
-   of the view has changed before.
-   Draw() is invoked automatically by the framework, you will never need to invoke 
-   this method directly. However you can request an invocation of this method by 
-   calling the method InvalidateArea() of the views @Owner. Usually this is also 
-   unnecessary unless you are developing your own view.
-   The passed parameters determine the drawing destination aCanvas and the area 
-   to redraw aClip in the coordinate space of the canvas. The parameter aOffset 
-   contains the displacement between the origin of the views owner and the origin 
-   of the canvas. You will need it to convert views coordinates into these of the 
-   canvas.
-   The parameter aOpacity contains the opacity descended from this view's @Owner. 
-   It lies in range 0 .. 255. If the view implements its own 'Opacity', 'Color', 
-   etc. properties, the Draw() method should calculate the resulting real opacity 
-   by mixing the values of these properties with the one passed in aOpacity parameter.
-   The parameter aBlend contains the blending mode descended from this view's @Owner. 
-   It determines, whether the view should be drawn with alpha-blending active or 
-   not. If aBlend is false, the outputs of the view should overwrite the corresponding 
-   pixel in the drawing destination aCanvas. If aBlend is true, the outputs should 
-   be mixed with the pixel already stored in aCanvas. For this purpose all Graphics 
-   Engine functions provide a parameter to specify the mode for the respective drawing 
-   operation. If the view implements its own 'Blend' property, the Draw() method 
-   should calculate the resulting real blend mode by using logical AND operation 
-   of the value of the property and the one passed in aBlend parameter. */
-void CoreRotateTouchHandler_Draw( CoreRotateTouchHandler _this, GraphicsCanvas aCanvas, 
-  XRect aClip, XPoint aOffset, XInt32 aOpacity, XBool aBlend )
-{
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( _this );
-  EW_UNUSED_ARG( aBlend );
-  EW_UNUSED_ARG( aOpacity );
-  EW_UNUSED_ARG( aOffset );
-  EW_UNUSED_ARG( aClip );
-  EW_UNUSED_ARG( aCanvas );
-}
-
-/* The method HandleEvent() is invoked automatically if the view has received an 
-   event. For example, touching the view on the touch screen can cause the view 
-   to receive a Core::CursorEvent event. Within this method the view can evaluate 
-   the event and react to it.
-   Whether the event has been handled by the view or not is determined by the return 
-   value. To sign an event as handled HandleEvent() should return a valid object 
-   (e.g. 'this'). If the event has not been handled, 'null' should be returned.
-   Depending on the kind of the event, the framework can continue dispatching of 
-   still unhandled events. For example, keyboard events (Core::KeyEvent class) are 
-   automatically delivered to the superior @Owner of the receiver view if this view 
-   has ignored the event.
-   HandleEvent() is invoked automatically by the framework, so you never should 
-   need to invoke it directly. However you can prepare and post new events by using 
-   the methods DispatchEvent() and BroadcastEvent() of the application class Core::Root. */
-XObject CoreRotateTouchHandler_HandleEvent( CoreRotateTouchHandler _this, CoreEvent 
-  aEvent )
-{
-  CoreCursorEvent event1 = EwCastObject( aEvent, CoreCursorEvent );
-  CoreDragEvent event2 = EwCastObject( aEvent, CoreDragEvent );
-  XBool press;
-  XBool hold;
-  XBool timeout;
-  XBool release;
-  XBool drag;
-  XPoint pos;
-  XInt32 angle;
-  XInt32 radius;
-  XInt32 oldRadius;
-  XInt32 delta;
-  XFloat r;
-
-  if (( event1 == 0 ) && ( event2 == 0 ))
-    return 0;
-
-  press = (XBool)((( event1 != 0 ) && event1->Down ) && ( event1->HoldPeriod == 
-  0 ));
-  hold = (XBool)((( event1 != 0 ) && event1->Down ) && ( event1->HoldPeriod > 0 ));
-  timeout = (XBool)((( event1 != 0 ) && event1->Down ) && ( event1->HoldPeriod > 
-  _this->multiFingerDelay ));
-  release = (XBool)(( event1 != 0 ) && !event1->Down );
-  drag = (XBool)( event2 != 0 );
-
-  if ( press )
-    _this->multiFingerDelay = (XInt16)( event1->AutoDeflected? 0 : 100 );
-
-  if ( press )
-  {
-    XInt32 noOfFingers = 0;
-    XUInt32 fingers;
-    _this->state = _this->state | ( 1 << event1->Finger );
-
-    for ( fingers = _this->state & 4095; fingers > 0; fingers = fingers >> 1 )
-      if (( fingers & 1 ) != 0 )
-        noOfFingers = noOfFingers + 1;
-
-    if ( noOfFingers == 1 )
-      _this->state = ( _this->state | 16777216 ) | ( 4096 << event1->Finger );
-  }
-
-  if ( release && ( _this->state < 16777216 ))
-  {
-    CoreRoot root = CoreView__GetRoot( _this );
-    CoreCursorHit hit = 0;
-
-    if ( root != 0 )
-    {
-      CoreView startView = (( _this->Super2.prev != 0 )? _this->Super2.prev : ((CoreView)_this->Super2.Owner ));
-      hit = CoreView__CursorHitTest( root, EwMoveRectPos( _Const000B, event1->GlobalCurrentPos ), 
-      event1->Finger, event1->StrikeCount, 0, startView, 0 );
-    }
-
-    if ( hit != 0 )
-    {
-      XPoint cp = CoreGroup_LocalPosition( hit->View->Owner, event1->GlobalCurrentPos );
-      XInt32 i;
-
-      for ( i = 0; i < 10; i++ )
-        if ( !!( _this->state & ( 1 << i )))
-          CoreView__HandleEvent( hit->View, ((CoreEvent)CoreCursorEvent_InitializeDown( 
-          EwNewObject( CoreCursorEvent, 0 ), i, cp, event1->StrikeCount, _Const0000, 
-          1, event1->GlobalCurrentPos )));
-
-      for ( i = 0; i < 10; i++ )
-        if ( !!( _this->state & ( 1 << i )))
-          CoreView__HandleEvent( hit->View, ((CoreEvent)CoreCursorEvent_InitializeUp( 
-          EwNewObject( CoreCursorEvent, 0 ), i, cp, cp, 0, event1->StrikeCount, 
-          _Const0000, 0, event1->GlobalCurrentPos, event1->GlobalCurrentPos )));
-    }
-  }
-
-  if ( release )
-    _this->state = ( _this->state & ~( 1 << event1->Finger )) | 33554432;
-
-  if ( timeout && ( _this->state < 16777216 ))
-    _this->state = _this->state | 67108864;
-
-  if ( release && event1->AutoDeflected )
-    _this->state = _this->state | 67108864;
-
-  if ( release && (( _this->state & 16777215 ) == 0 ))
-    _this->state = 0;
-
-  if ( hold && ( _this->state >= 67108864 ))
-  {
-    CoreRoot root = CoreView__GetRoot( _this );
-
-    if (( root != 0 ) && !( CoreRoot_RetargetCursorWithReason( root, 0, ((CoreView)_this ), 
-        ((CoreView)_this ), 0 ) != 0 ))
-      CoreRoot_RetargetCursorWithReason( root, 0, ((CoreView)_this ), 0, 0 );
-  }
-
-  if (( hold && (( _this->state & 16777216 ) != 0 )) && (( _this->state & 33554432 ) 
-      != 0 ))
-  {
-    hold = 0;
-    release = 1;
-  }
-
-  if (( event1 != 0 ) && (( _this->state & ( 4096 << event1->Finger )) == 0 ))
-    return ((XObject)_this );
-
-  if (( event2 != 0 ) && (( _this->state & ( 4096 << event2->Finger )) == 0 ))
-    return ((XObject)_this );
-
-  if ( release && (( _this->state & 16777216 ) == 0 ))
-    return ((XObject)_this );
-
-  if ((( press || drag ) || hold ) && (( _this->state < 16777216 ) || ( _this->state 
-      >= 33554432 )))
-    return ((XObject)_this );
-
-  if ( release )
-    _this->state = _this->state & 4261416959U;
-
-  if ( release && (( _this->state & 16777215 ) == 0 ))
-    _this->state = 0;
-
-  if ((( !press && !release ) && !drag ) && !hold )
-    return ((XObject)_this );
-
-  pos = _Const0000;
-  angle = _this->Angle;
-  radius = _this->Radius;
-  oldRadius = radius;
-
-  if (( press || release ) || hold )
-  {
-    _this->Inside = (XBool)EwIsPointInRect( _this->Super1.Bounds, event1->CurrentPos );
-    _this->AutoDeflected = event1->AutoDeflected;
-    _this->HittingPos = event1->HittingPos;
-    _this->Down = (XBool)( press || hold );
-    pos = EwMovePointNeg( EwMovePointNeg( event1->CurrentPos, EwGetRectCenter( _this->Super1.Bounds )), 
-    _this->CenterOffset );
-  }
-
-  if ( drag )
-  {
-    _this->Inside = (XBool)EwIsPointInRect( _this->Super1.Bounds, event2->CurrentPos );
-    _this->HittingPos = event2->HittingPos;
-    _this->Down = 1;
-    pos = EwMovePointNeg( EwMovePointNeg( event2->CurrentPos, EwGetRectCenter( _this->Super1.Bounds )), 
-    _this->CenterOffset );
-  }
-
-  r = EwMathSqrt((XFloat)(( pos.X * pos.X ) + ( pos.Y * pos.Y )));
-
-  if ( r >= 8.0f )
-  {
-    radius = (XInt32)r;
-    angle = (XInt32)EwMathArcCos((XFloat)pos.X / r );
-
-    if ( pos.Y > 0 )
-      angle = 360 - angle;
-  }
-
-  delta = angle - _this->Angle;
-
-  if ( delta > 180 )
-    delta = delta - 360;
-
-  if ( delta < -180 )
-    delta = delta + 360;
-
-  _this->Angle = angle;
-  _this->Delta = delta;
-  _this->Relative = _this->Relative + delta;
-  _this->Radius = radius;
-
-  if ( press )
-  {
-    _this->Delta = 0;
-    _this->Relative = 0;
-    EwSignal( _this->OnStart, ((XObject)_this ));
-  }
-
-  if (( delta != 0 ) || ( radius != oldRadius ))
-    EwSignal( _this->OnRotate, ((XObject)_this ));
-
-  if ( release )
-    EwSignal( _this->OnEnd, ((XObject)_this ));
-
-  return ((XObject)_this );
-}
-
-/* The method CursorHitTest() is invoked automatically in order to determine whether 
-   the view is interested in the receipt of cursor events or not. This method will 
-   be invoked immediately after the user has tapped the visible area of the view. 
-   If the view is not interested in the cursor event, the framework repeats this 
-   procedure for the next behind view until a willing view has been found or all 
-   views are evaluated.
-   In the implementation of the method the view can evaluate the passed aArea parameter. 
-   It determines the place where the user has tapped the view with his fingertip 
-   expressed in the coordinates of the views @Owner. The method can test e.g. whether 
-   the tapped area does intersect any touchable areas within the view, etc. The 
-   affected finger is identified in the parameter aFinger. The first finger (or 
-   the first mouse device button) has the number 0.
-   The parameter aStrikeCount determines how many times the same area has been tapped 
-   in series. This is useful to detect series of multiple touches, e.g. in case 
-   of the double click, aStrikeCount == 2.
-   The parameter aDedicatedView, if it is not 'null', restricts the event to be 
-   handled by this view only. If aDedicatedView == null, no special restriction 
-   exists.
-   The parameter aStartView, if it is not 'null', restricts the event to be handled 
-   by the specified view or another view lying behind it. In other words, views 
-   found in front of aStartView are not taken in account during the hit-test operation.
-   This method is also invoked if during an existing grab cycle the current target 
-   view has decided to resign and deflect the cursor events to another view. This 
-   is usually the case after the user has performed a gesture the current target 
-   view is not interested to process. Thereupon, the system looks for another view 
-   willing to take over the cursor event processing after the performed gesture. 
-   Which gesture has caused the operation, is specified in the parameter aRetargetReason.
-   If the view is willing to process the event, the method should create, initialize 
-   and return a new Core::CursorHit object. This object identify the willing view. 
-   Otherwise the method should return 'null'.
-   CursorHitTest() is invoked automatically by the framework, so you never should 
-   need to invoke it directly. This method is predetermined for the hit-test only. 
-   The proper processing of events should take place in the @HandleEvent() method 
-   by reacting to Core::CursorEvent and Core::DragEvent events. */
-CoreCursorHit CoreRotateTouchHandler_CursorHitTest( CoreRotateTouchHandler _this, 
-  XRect aArea, XInt32 aFinger, XInt32 aStrikeCount, CoreView aDedicatedView, CoreView 
-  aStartView, XSet aRetargetReason )
-{
-  XRect r;
-
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( aRetargetReason );
-  EW_UNUSED_ARG( aStartView );
-  EW_UNUSED_ARG( aStrikeCount );
-
-  if (( aDedicatedView != 0 ) && ( aDedicatedView != (CoreView)_this ))
-    return 0;
-
-  if ( _this->state >= 33554432 )
-    return 0;
-
-  if (( _this->state >= 16777216 ) && (( _this->state & ( 4096 << aFinger )) == 
-      0 ))
-    return 0;
-
-  r = EwIntersectRect( aArea, _this->Super1.Bounds );
-
-  if ( !EwIsRectEmpty( r ))
-  {
-    XPoint center = EwGetRectCenter( aArea );
-    XPoint offset = _Const0000;
-
-    if ( center.X < r.Point1.X )
-      offset.X = ( r.Point1.X - center.X );
-
-    if ( center.X >= r.Point2.X )
-      offset.X = (( r.Point2.X - center.X ) - 1 );
-
-    if ( center.Y < r.Point1.Y )
-      offset.Y = ( r.Point1.Y - center.Y );
-
-    if ( center.Y >= r.Point2.Y )
-      offset.Y = (( r.Point2.Y - center.Y ) - 1 );
-
-    return CoreCursorHit_Initialize( EwNewObject( CoreCursorHit, 0 ), ((CoreView)_this ), 
-      offset );
-  }
-
-  return 0;
-}
-
-/* 'C' function for method : 'Core::RotateTouchHandler.OnSetCenterOffset()' */
-void CoreRotateTouchHandler_OnSetCenterOffset( CoreRotateTouchHandler _this, XPoint 
-  value )
-{
-  if ( !EwCompPoint( value, _this->CenterOffset ))
-    return;
-
-  _this->CenterOffset = value;
-}
-
-/* 'C' function for method : 'Core::RotateTouchHandler.OnSetEnabled()' */
-void CoreRotateTouchHandler_OnSetEnabled( CoreRotateTouchHandler _this, XBool value )
-{
-  if ( value )
-    CoreView__ChangeViewState( _this, CoreViewStatePreEnabled, 0 );
-  else
-    CoreView__ChangeViewState( _this, 0, CoreViewStatePreEnabled );
-}
-
-/* Variants derived from the class : 'Core::RotateTouchHandler' */
-EW_DEFINE_CLASS_VARIANTS( CoreRotateTouchHandler )
-EW_END_OF_CLASS_VARIANTS( CoreRotateTouchHandler )
-
-/* Virtual Method Table (VMT) for the class : 'Core::RotateTouchHandler' */
-EW_DEFINE_CLASS( CoreRotateTouchHandler, CoreRectView, OnRotate, OnRotate, OnRotate, 
-                 state, state, state, "Core::RotateTouchHandler" )
-  CoreView_GetRoot,
-  CoreRotateTouchHandler_Draw,
-  CoreView_GetClipping,
-  CoreRotateTouchHandler_HandleEvent,
-  CoreRotateTouchHandler_CursorHitTest,
-  CoreView_AdjustDrawingArea,
-  CoreRectView_ArrangeView,
-  CoreRectView_MoveView,
-  CoreRectView_GetExtent,
-  CoreView_ChangeViewState,
-  CoreRectView_OnSetBounds,
-EW_END_OF_CLASS( CoreRotateTouchHandler )
 
 /* Initializer for the class 'Core::KeyPressHandler' */
 void CoreKeyPressHandler__Init( CoreKeyPressHandler _this, XObject aLink, XHandle aArg )
@@ -5402,6 +5564,7 @@ void CoreKeyPressHandler__Init( CoreKeyPressHandler _this, XObject aLink, XHandl
 
   /* ... and initialize objects, variables, properties, etc. */
   _this->Filter = CoreKeyCodeAnyKey;
+  _this->Enabled = 1;
 
   /* Call the user defined constructor */
   CoreKeyPressHandler_Init( _this, aArg );
@@ -5436,7 +5599,7 @@ void CoreKeyPressHandler_Init( CoreKeyPressHandler _this, XHandle aArg )
 
   if ( group == 0 )
   {
-    EwThrow( EwLoadString( &_Const000C ));
+    EwThrow( EwLoadString( &_Const000D ));
     return;
   }
 
@@ -5459,9 +5622,7 @@ XBool CoreKeyPressHandler_HandleEvent( CoreKeyPressHandler _this, CoreKeyEvent a
       _this->RepetitionCount = _this->pressCounter;
       _this->Repetition = (XBool)( _this->pressCounter > 0 );
 
-      if ( _this->Repetition )
-        EwSignal( _this->OnHold, ((XObject)_this ));
-      else
+      if ( !_this->Repetition )
         EwSignal( _this->OnPress, ((XObject)_this ));
 
       _this->pressCounter = _this->pressCounter + 1;
@@ -5473,6 +5634,7 @@ XBool CoreKeyPressHandler_HandleEvent( CoreKeyPressHandler _this, CoreKeyEvent a
       _this->Repetition = (XBool)( _this->pressCounter > 1 );
       _this->RepetitionCount = _this->pressCounter - 1;
       _this->pressCounter = 0;
+      EwSignal( _this->OnRelease, ((XObject)_this ));
       return 1;
     }
   }
@@ -5485,7 +5647,7 @@ EW_DEFINE_CLASS_VARIANTS( CoreKeyPressHandler )
 EW_END_OF_CLASS_VARIANTS( CoreKeyPressHandler )
 
 /* Virtual Method Table (VMT) for the class : 'Core::KeyPressHandler' */
-EW_DEFINE_CLASS( CoreKeyPressHandler, XObject, next, next, OnPress, pressCounter, 
+EW_DEFINE_CLASS( CoreKeyPressHandler, XObject, next, next, OnRelease, pressCounter, 
                  pressCounter, pressCounter, "Core::KeyPressHandler" )
 EW_END_OF_CLASS( CoreKeyPressHandler )
 
@@ -5579,8 +5741,8 @@ EW_DEFINE_CLASS_VARIANTS( CoreLayoutContext )
 EW_END_OF_CLASS_VARIANTS( CoreLayoutContext )
 
 /* Virtual Method Table (VMT) for the class : 'Core::LayoutContext' */
-EW_DEFINE_CLASS( CoreLayoutContext, XObject, _.VMT, _.VMT, _.VMT, _.VMT, _.VMT, 
-                 _.VMT, "Core::LayoutContext" )
+EW_DEFINE_CLASS( CoreLayoutContext, XObject, outline, outline, extent, extent, extent, 
+                 extent, "Core::LayoutContext" )
 EW_END_OF_CLASS( CoreLayoutContext )
 
 /* Initializer for the class 'Core::LayoutQuadContext' */
@@ -5621,432 +5783,6 @@ EW_END_OF_CLASS_VARIANTS( CoreLayoutQuadContext )
 EW_DEFINE_CLASS( CoreLayoutQuadContext, CoreLayoutContext, _.VMT, _.VMT, _.VMT, 
                  _.VMT, _.VMT, _.VMT, "Core::LayoutQuadContext" )
 EW_END_OF_CLASS( CoreLayoutQuadContext )
-
-/* Initializer for the class 'Core::TaskQueue' */
-void CoreTaskQueue__Init( CoreTaskQueue _this, XObject aLink, XHandle aArg )
-{
-  /* At first initialize the super class ... */
-  XObject__Init( &_this->_.Super, aLink, aArg );
-
-  /* Allow the Immediate Garbage Collection to evalute the members of this class. */
-  _this->_.XObject._.GCT = EW_CLASS_GCT( CoreTaskQueue );
-
-  /* Setup the VMT pointer */
-  _this->_.VMT = EW_CLASS( CoreTaskQueue );
-}
-
-/* Re-Initializer for the class 'Core::TaskQueue' */
-void CoreTaskQueue__ReInit( CoreTaskQueue _this )
-{
-  /* At first re-initialize the super class ... */
-  XObject__ReInit( &_this->_.Super );
-}
-
-/* Finalizer method for the class 'Core::TaskQueue' */
-void CoreTaskQueue__Done( CoreTaskQueue _this )
-{
-  /* Finalize this class */
-  _this->_.Super._.VMT = EW_CLASS( XObject );
-
-  /* Don't forget to deinitialize the super class ... */
-  XObject__Done( &_this->_.Super );
-}
-
-/* 'C' function for method : 'Core::TaskQueue.completeTask()' */
-void CoreTaskQueue_completeTask( CoreTaskQueue _this )
-{
-  CoreTask task;
-
-  if ( _this->current == 0 )
-    return;
-
-  task = _this->current;
-  _this->current->queue = 0;
-  _this->current = 0;
-  EwPostSignal( EwNewSlot( _this, CoreTaskQueue_onPreDispatchNext1 ), ((XObject)_this ));
-  CoreTask_OnComplete( task, _this );
-}
-
-/* 'C' function for method : 'Core::TaskQueue.onDispatchNext()' */
-void CoreTaskQueue_onDispatchNext( CoreTaskQueue _this, XObject sender )
-{
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( sender );
-
-  if ( _this->current != 0 )
-    return;
-
-  if ( _this->first == 0 )
-    return;
-
-  _this->current = _this->first;
-  _this->first = _this->first->next;
-
-  if ( _this->first != 0 )
-    _this->first->prev = 0;
-  else
-    _this->last = 0;
-
-  _this->current->next = 0;
-  _this->isInOnStart = 1;
-  CoreTask__OnStart( _this->current, _this );
-  _this->isInOnStart = 0;
-}
-
-/* 'C' function for method : 'Core::TaskQueue.onPreDispatchNext3()' */
-void CoreTaskQueue_onPreDispatchNext3( CoreTaskQueue _this, XObject sender )
-{
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( sender );
-
-  EwPostSignal( EwNewSlot( _this, CoreTaskQueue_onDispatchNext ), ((XObject)_this ));
-}
-
-/* 'C' function for method : 'Core::TaskQueue.onPreDispatchNext2()' */
-void CoreTaskQueue_onPreDispatchNext2( CoreTaskQueue _this, XObject sender )
-{
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( sender );
-
-  EwPostSignal( EwNewSlot( _this, CoreTaskQueue_onPreDispatchNext3 ), ((XObject)_this ));
-}
-
-/* 'C' function for method : 'Core::TaskQueue.onPreDispatchNext1()' */
-void CoreTaskQueue_onPreDispatchNext1( CoreTaskQueue _this, XObject sender )
-{
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( sender );
-
-  EwPostSignal( EwNewSlot( _this, CoreTaskQueue_onPreDispatchNext2 ), ((XObject)_this ));
-}
-
-/* The method CancelTask() allows the application to remove a previously registered 
-   task from the task queue. The affected task is determined by the parameter aTask.
-   If the affected task is currently executed, the task is notified to immediately 
-   finalize its work. Afterwards the queue starts the next available task. The method 
-   will throw an error if you try to cancel a task not belonging to this queue. */
-void CoreTaskQueue_CancelTask( CoreTaskQueue _this, CoreTask aTask )
-{
-  XBool wasStarted;
-
-  if (( aTask == 0 ) || ( aTask->queue == 0 ))
-    return;
-
-  if ( aTask->queue != _this )
-  {
-    EwThrow( EwLoadString( &_Const000D ));
-    return;
-  }
-
-  wasStarted = 0;
-
-  if ( _this->current == aTask )
-  {
-    _this->current = 0;
-    wasStarted = 1;
-    EwPostSignal( EwNewSlot( _this, CoreTaskQueue_onPreDispatchNext1 ), ((XObject)_this ));
-  }
-  else
-  {
-    if ( aTask->next != 0 )
-      aTask->next->prev = aTask->prev;
-    else
-      _this->last = aTask->prev;
-
-    if ( aTask->prev != 0 )
-      aTask->prev->next = aTask->next;
-    else
-      _this->first = aTask->next;
-
-    aTask->prev = 0;
-    aTask->next = 0;
-  }
-
-  aTask->queue = 0;
-
-  if ( wasStarted )
-    CoreTask_OnCancel( aTask, _this );
-}
-
-/* The method ScheduleTask() registers the task passed in the parameter aTask for 
-   later execution.
-   The tasks are executed in the order in which they have been previously scheduled. 
-   If the parameter aWithPriority is false, the new task will be arranged at the 
-   end of the list with waiting tasks. If the parameter is true, the task is enqueued 
-   in front of all waiting tasks.
-   The method will throw an error if you try to schedule the same task twice. */
-void CoreTaskQueue_ScheduleTask( CoreTaskQueue _this, CoreTask aTask, XBool aWithPriority )
-{
-  if ( aTask == 0 )
-    return;
-
-  if ( aTask->queue != 0 )
-  {
-    EwThrow( EwLoadString( &_Const000E ));
-    return;
-  }
-
-  aTask->queue = _this;
-
-  if ( aWithPriority )
-  {
-    aTask->next = _this->first;
-
-    if ( _this->first != 0 )
-      _this->first->prev = aTask;
-    else
-      _this->last = aTask;
-
-    _this->first = aTask;
-  }
-  else
-  {
-    aTask->prev = _this->last;
-
-    if ( _this->last != 0 )
-      _this->last->next = aTask;
-    else
-      _this->first = aTask;
-
-    _this->last = aTask;
-  }
-
-  if ( _this->current == 0 )
-    EwPostSignal( EwNewSlot( _this, CoreTaskQueue_onPreDispatchNext1 ), ((XObject)_this ));
-}
-
-/* Variants derived from the class : 'Core::TaskQueue' */
-EW_DEFINE_CLASS_VARIANTS( CoreTaskQueue )
-EW_END_OF_CLASS_VARIANTS( CoreTaskQueue )
-
-/* Virtual Method Table (VMT) for the class : 'Core::TaskQueue' */
-EW_DEFINE_CLASS( CoreTaskQueue, XObject, current, current, isInOnStart, isInOnStart, 
-                 isInOnStart, isInOnStart, "Core::TaskQueue" )
-EW_END_OF_CLASS( CoreTaskQueue )
-
-/* Initializer for the class 'Core::Task' */
-void CoreTask__Init( CoreTask _this, XObject aLink, XHandle aArg )
-{
-  /* At first initialize the super class ... */
-  XObject__Init( &_this->_.Super, aLink, aArg );
-
-  /* Allow the Immediate Garbage Collection to evalute the members of this class. */
-  _this->_.XObject._.GCT = EW_CLASS_GCT( CoreTask );
-
-  /* Setup the VMT pointer */
-  _this->_.VMT = EW_CLASS( CoreTask );
-}
-
-/* Re-Initializer for the class 'Core::Task' */
-void CoreTask__ReInit( CoreTask _this )
-{
-  /* At first re-initialize the super class ... */
-  XObject__ReInit( &_this->_.Super );
-}
-
-/* Finalizer method for the class 'Core::Task' */
-void CoreTask__Done( CoreTask _this )
-{
-  /* Finalize this class */
-  _this->_.Super._.VMT = EW_CLASS( XObject );
-
-  /* Don't forget to deinitialize the super class ... */
-  XObject__Done( &_this->_.Super );
-}
-
-/* The method OnComplete() is called when the task is done with its work. The default 
-   implementation of this method does nothing. You can override this method in derived 
-   task classes and implement what to do when the task is finished. For example, 
-   you can release resources used temporarily during animations.
-   To complete a task you should call explicitly the method @Complete(). The parameter 
-   aQueue refers to the queue this task belonged to. It can be used e.g. to schedule 
-   again a task to the same queue, etc. */
-void CoreTask_OnComplete( CoreTask _this, CoreTaskQueue aQueue )
-{
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( _this );
-  EW_UNUSED_ARG( aQueue );
-}
-
-/* The method OnCancel() is called when the task is canceled after being started. 
-   The default implementation of this method does nothing. You can override this 
-   method in derived task classes and implement what to do when the task is prematurely 
-   aborted. For example, you can stop running timers and effects started in the 
-   preceding @OnStart() method.
-   To cancel a task you should call explicitly the method @Cancel(). The parameter 
-   aQueue refers to the queue this task belonged to. It can be used e.g. to schedule 
-   again a task to the same queue, etc. */
-void CoreTask_OnCancel( CoreTask _this, CoreTaskQueue aQueue )
-{
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( _this );
-  EW_UNUSED_ARG( aQueue );
-}
-
-/* The method OnStart() is called at the begin of the execution of this task. The 
-   default implementation of the method simply cancels the task causing the next 
-   available task in the task queue to be started. You should override this method 
-   in derived task classes to implement what the task should do.
-   There are three typical application cases how to implement the OnStart() method:
-   - In its simplest case the entire task algorithm is implemented in the OnStart() 
-   method. In this case the method @Complete() should be called before leaving OnStart().
-   - If the task does take long time for execution by using timers or effects, you 
-   should put in OnStart() the code necessary to start the timers/effects. Don't 
-   forget to call @Complete() when all timers/effects are done.
-   - If the task is divided in many small execution steps, the OnStart() method 
-   should call @Continue() to request the @OnContinue() method to be executed after 
-   a short delay (usually after the next screen update). In @OnContinue() you can 
-   perform the next step of the task. If necessary, @OnContinue() can also request 
-   to be called again after a short delay. At the end of the task, after the last 
-   step is terminated, don't forget to call @Complete().
-   The parameter aQueue refers to the queue this task belongs to. It can be used 
-   to schedule more task to execute later. */
-void CoreTask_OnStart( CoreTask _this, CoreTaskQueue aQueue )
-{
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( aQueue );
-
-  CoreTask_Cancel( _this );
-}
-
-/* Wrapper function for the virtual method : 'Core::Task.OnStart()' */
-void CoreTask__OnStart( void* _this, CoreTaskQueue aQueue )
-{
-  ((CoreTask)_this)->_.VMT->OnStart((CoreTask)_this, aQueue );
-}
-
-/* The method Complete() informs the task queue about the completion of this task. 
-   Thereupon the next available task in the queue can be executed. This method is 
-   usually called in context of the @OnStart() or @OnContinue() method when the 
-   task has finalized its work. Calling the method for a not current task has no 
-   effect. */
-void CoreTask_Complete( CoreTask _this )
-{
-  if (( _this->queue != 0 ) && ( _this->queue->current == _this ))
-    CoreTaskQueue_completeTask( _this->queue );
-}
-
-/* The method Cancel() removes this task from the task queue where the task has 
-   been previously scheduled. In the case the task is already in progress, the queue 
-   will advise the task to abort its work immediately before the task is removed 
-   from the queue (see @OnCancel()).
-   Whether a task is waiting for execution can be determined by @IsScheduled(). 
-   Whether a task is in progress can be determined by @IsCurrent().
-   Canceling a running task will cause the task queue to start the next available 
-   task. */
-void CoreTask_Cancel( CoreTask _this )
-{
-  if ( _this->queue != 0 )
-    CoreTaskQueue_CancelTask( _this->queue, _this );
-}
-
-/* Variants derived from the class : 'Core::Task' */
-EW_DEFINE_CLASS_VARIANTS( CoreTask )
-EW_END_OF_CLASS_VARIANTS( CoreTask )
-
-/* Virtual Method Table (VMT) for the class : 'Core::Task' */
-EW_DEFINE_CLASS( CoreTask, XObject, queue, queue, _.VMT, _.VMT, _.VMT, _.VMT, "Core::Task" )
-  CoreTask_OnStart,
-EW_END_OF_CLASS( CoreTask )
-
-/* Initializer for the class 'Core::SystemEventTask' */
-void CoreSystemEventTask__Init( CoreSystemEventTask _this, XObject aLink, XHandle aArg )
-{
-  /* At first initialize the super class ... */
-  CoreTask__Init( &_this->_.Super, aLink, aArg );
-
-  /* Allow the Immediate Garbage Collection to evalute the members of this class. */
-  _this->_.XObject._.GCT = EW_CLASS_GCT( CoreSystemEventTask );
-
-  /* Setup the VMT pointer */
-  _this->_.VMT = EW_CLASS( CoreSystemEventTask );
-}
-
-/* Re-Initializer for the class 'Core::SystemEventTask' */
-void CoreSystemEventTask__ReInit( CoreSystemEventTask _this )
-{
-  /* At first re-initialize the super class ... */
-  CoreTask__ReInit( &_this->_.Super );
-}
-
-/* Finalizer method for the class 'Core::SystemEventTask' */
-void CoreSystemEventTask__Done( CoreSystemEventTask _this )
-{
-  /* Finalize this class */
-  _this->_.Super._.VMT = EW_CLASS( CoreTask );
-
-  /* Don't forget to deinitialize the super class ... */
-  CoreTask__Done( &_this->_.Super );
-}
-
-/* The method OnStart() is called at the begin of the execution of this task. The 
-   default implementation of the method simply cancels the task causing the next 
-   available task in the task queue to be started. You should override this method 
-   in derived task classes to implement what the task should do.
-   There are three typical application cases how to implement the OnStart() method:
-   - In its simplest case the entire task algorithm is implemented in the OnStart() 
-   method. In this case the method @Complete() should be called before leaving OnStart().
-   - If the task does take long time for execution by using timers or effects, you 
-   should put in OnStart() the code necessary to start the timers/effects. Don't 
-   forget to call @Complete() when all timers/effects are done.
-   - If the task is divided in many small execution steps, the OnStart() method 
-   should call @Continue() to request the @OnContinue() method to be executed after 
-   a short delay (usually after the next screen update). In @OnContinue() you can 
-   perform the next step of the task. If necessary, @OnContinue() can also request 
-   to be called again after a short delay. At the end of the task, after the last 
-   step is terminated, don't forget to call @Complete().
-   The parameter aQueue refers to the queue this task belongs to. It can be used 
-   to schedule more task to execute later. */
-void CoreSystemEventTask_OnStart( CoreSystemEventTask _this, CoreTaskQueue aQueue )
-{
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( aQueue );
-
-  _this->target->context = _this->context;
-  EwNotifyObjObservers((XObject)_this->target, 0 );
-  EwPostSignal( EwNewSlot( _this, CoreSystemEventTask_onDelivered ), ((XObject)_this ));
-}
-
-/* 'C' function for method : 'Core::SystemEventTask.onDelivered()' */
-void CoreSystemEventTask_onDelivered( CoreSystemEventTask _this, XObject sender )
-{
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( sender );
-
-  _this->target->context = 0;
-  _this->target = 0;
-  _this->context = 0;
-  CoreTask_Complete((CoreTask)_this );
-}
-
-/* Variants derived from the class : 'Core::SystemEventTask' */
-EW_DEFINE_CLASS_VARIANTS( CoreSystemEventTask )
-EW_END_OF_CLASS_VARIANTS( CoreSystemEventTask )
-
-/* Virtual Method Table (VMT) for the class : 'Core::SystemEventTask' */
-EW_DEFINE_CLASS( CoreSystemEventTask, CoreTask, context, context, _.VMT, _.VMT, 
-                 _.VMT, _.VMT, "Core::SystemEventTask" )
-  CoreSystemEventTask_OnStart,
-EW_END_OF_CLASS( CoreSystemEventTask )
-
-/* User defined auto object: 'Core::SystemEventQueue' */
-EW_DEFINE_AUTOOBJECT( CoreSystemEventQueue, CoreTaskQueue )
-
-/* Initializer for the auto object 'Core::SystemEventQueue' */
-void CoreSystemEventQueue__Init( CoreTaskQueue _this )
-{
-  EW_UNUSED_ARG( _this );
-}
-
-/* Re-Initializer for the auto object 'Core::SystemEventQueue' */
-void CoreSystemEventQueue__ReInit( CoreTaskQueue _this )
-{
-  EW_UNUSED_ARG( _this );
-}
-
-/* Table with links to derived variants of the auto object : 'Core::SystemEventQueue' */
-EW_DEFINE_AUTOOBJECT_VARIANTS( CoreSystemEventQueue )
-EW_END_OF_AUTOOBJECT_VARIANTS( CoreSystemEventQueue )
 
 /* Initializer for the class 'Core::Resource' */
 void CoreResource__Init( CoreResource _this, XObject aLink, XHandle aArg )
@@ -6306,205 +6042,6 @@ EW_DEFINE_CLASS( CoreTimer, XObject, OnTrigger, OnTrigger, OnTrigger, timer, tim
                  timer, "Core::Timer" )
   CoreTimer_Trigger,
 EW_END_OF_CLASS( CoreTimer )
-
-/* Initializer for the class 'Core::SystemEvent' */
-void CoreSystemEvent__Init( CoreSystemEvent _this, XObject aLink, XHandle aArg )
-{
-  /* At first initialize the super class ... */
-  XObject__Init( &_this->_.Super, aLink, aArg );
-
-  /* Allow the Immediate Garbage Collection to evalute the members of this class. */
-  _this->_.XObject._.GCT = EW_CLASS_GCT( CoreSystemEvent );
-
-  /* Setup the VMT pointer */
-  _this->_.VMT = EW_CLASS( CoreSystemEvent );
-
-  /* ... and initialize objects, variables, properties, etc. */
-  _this->queue = EwGetAutoObject( &CoreSystemEventQueue, CoreTaskQueue );
-}
-
-/* Re-Initializer for the class 'Core::SystemEvent' */
-void CoreSystemEvent__ReInit( CoreSystemEvent _this )
-{
-  /* At first re-initialize the super class ... */
-  XObject__ReInit( &_this->_.Super );
-}
-
-/* Finalizer method for the class 'Core::SystemEvent' */
-void CoreSystemEvent__Done( CoreSystemEvent _this )
-{
-  /* Finalize this class */
-  _this->_.Super._.VMT = EW_CLASS( XObject );
-
-  /* Don't forget to deinitialize the super class ... */
-  XObject__Done( &_this->_.Super );
-}
-
-/* The method Trigger() enqueues this event for delivery. The delivery occurs asynchronously 
-   in the order in which the events are triggered. If the parameter aWithPriority 
-   is false, the new event will be arranged at the end of a common system event 
-   queue. If the parameter is true, the event is enqueued in front of all waiting 
-   events causing it to be delivered early.
-   When the event is delivered all associated Core::SystemEventHandler components 
-   are notified to handle the event. Here the system event handler can access and 
-   evaluate the optional context data passed in the parameter aContext. */
-void CoreSystemEvent_Trigger( CoreSystemEvent _this, XObject aContext, XBool aWithPriority )
-{
-  CoreSystemEventTask task = EwNewObject( CoreSystemEventTask, 0 );
-
-  task->target = _this;
-  task->context = aContext;
-  CoreTaskQueue_ScheduleTask( _this->queue, ((CoreTask)task ), aWithPriority );
-}
-
-/* Variants derived from the class : 'Core::SystemEvent' */
-EW_DEFINE_CLASS_VARIANTS( CoreSystemEvent )
-EW_END_OF_CLASS_VARIANTS( CoreSystemEvent )
-
-/* Virtual Method Table (VMT) for the class : 'Core::SystemEvent' */
-EW_DEFINE_CLASS( CoreSystemEvent, XObject, context, context, _.VMT, _.VMT, _.VMT, 
-                 _.VMT, "Core::SystemEvent" )
-EW_END_OF_CLASS( CoreSystemEvent )
-
-/* Initializer for the class 'Core::SystemEventHandler' */
-void CoreSystemEventHandler__Init( CoreSystemEventHandler _this, XObject aLink, XHandle aArg )
-{
-  /* At first initialize the super class ... */
-  XObject__Init( &_this->_.Super, aLink, aArg );
-
-  /* Allow the Immediate Garbage Collection to evalute the members of this class. */
-  _this->_.XObject._.GCT = EW_CLASS_GCT( CoreSystemEventHandler );
-
-  /* Setup the VMT pointer */
-  _this->_.VMT = EW_CLASS( CoreSystemEventHandler );
-
-  /* ... and initialize objects, variables, properties, etc. */
-}
-
-/* Re-Initializer for the class 'Core::SystemEventHandler' */
-void CoreSystemEventHandler__ReInit( CoreSystemEventHandler _this )
-{
-  /* At first re-initialize the super class ... */
-  XObject__ReInit( &_this->_.Super );
-}
-
-/* Finalizer method for the class 'Core::SystemEventHandler' */
-void CoreSystemEventHandler__Done( CoreSystemEventHandler _this )
-{
-  /* Finalize this class */
-  _this->_.Super._.VMT = EW_CLASS( XObject );
-
-  /* Don't forget to deinitialize the super class ... */
-  XObject__Done( &_this->_.Super );
-}
-
-/* 'C' function for method : 'Core::SystemEventHandler.onEvent()' */
-void CoreSystemEventHandler_onEvent( CoreSystemEventHandler _this, XObject sender )
-{
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( sender );
-
-  if ( _this->Event == 0 )
-    return;
-
-  _this->Context = _this->Event->context;
-  EwSignal( _this->OnEvent, ((XObject)_this ));
-  _this->Context = 0;
-}
-
-/* 'C' function for method : 'Core::SystemEventHandler.OnSetEvent()' */
-void CoreSystemEventHandler_OnSetEvent( CoreSystemEventHandler _this, CoreSystemEvent 
-  value )
-{
-  if ( _this->Event == value )
-    return;
-
-  if ( _this->Event != 0 )
-    EwDetachObjObserver( EwNewSlot( _this, CoreSystemEventHandler_onEvent ), (XObject)_this->Event, 
-      0 );
-
-  _this->Event = value;
-
-  if ( _this->Event != 0 )
-    EwAttachObjObserver( EwNewSlot( _this, CoreSystemEventHandler_onEvent ), (XObject)_this->Event, 
-      0 );
-}
-
-/* Variants derived from the class : 'Core::SystemEventHandler' */
-EW_DEFINE_CLASS_VARIANTS( CoreSystemEventHandler )
-EW_END_OF_CLASS_VARIANTS( CoreSystemEventHandler )
-
-/* Virtual Method Table (VMT) for the class : 'Core::SystemEventHandler' */
-EW_DEFINE_CLASS( CoreSystemEventHandler, XObject, Context, Context, OnEvent, _.VMT, 
-                 _.VMT, _.VMT, "Core::SystemEventHandler" )
-EW_END_OF_CLASS( CoreSystemEventHandler )
-
-/* Initializer for the class 'Core::PropertyObserver' */
-void CorePropertyObserver__Init( CorePropertyObserver _this, XObject aLink, XHandle aArg )
-{
-  /* At first initialize the super class ... */
-  XObject__Init( &_this->_.Super, aLink, aArg );
-
-  /* Allow the Immediate Garbage Collection to evalute the members of this class. */
-  _this->_.XObject._.GCT = EW_CLASS_GCT( CorePropertyObserver );
-
-  /* Setup the VMT pointer */
-  _this->_.VMT = EW_CLASS( CorePropertyObserver );
-
-  /* ... and initialize objects, variables, properties, etc. */
-}
-
-/* Re-Initializer for the class 'Core::PropertyObserver' */
-void CorePropertyObserver__ReInit( CorePropertyObserver _this )
-{
-  /* At first re-initialize the super class ... */
-  XObject__ReInit( &_this->_.Super );
-}
-
-/* Finalizer method for the class 'Core::PropertyObserver' */
-void CorePropertyObserver__Done( CorePropertyObserver _this )
-{
-  /* Finalize this class */
-  _this->_.Super._.VMT = EW_CLASS( XObject );
-
-  /* Don't forget to deinitialize the super class ... */
-  XObject__Done( &_this->_.Super );
-}
-
-/* 'C' function for method : 'Core::PropertyObserver.onEvent()' */
-void CorePropertyObserver_onEvent( CorePropertyObserver _this, XObject sender )
-{
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( sender );
-
-  EwSignal( _this->OnEvent, ((XObject)_this ));
-}
-
-/* 'C' function for method : 'Core::PropertyObserver.OnSetOutlet()' */
-void CorePropertyObserver_OnSetOutlet( CorePropertyObserver _this, XRef value )
-{
-  if ( !EwCompRef( _this->Outlet, value ))
-    return;
-
-  if ( _this->Outlet.Object != 0 )
-    EwDetachRefObserver( EwNewSlot( _this, CorePropertyObserver_onEvent ), _this->Outlet, 
-      0 );
-
-  _this->Outlet = value;
-
-  if ( _this->Outlet.Object != 0 )
-    EwAttachRefObserver( EwNewSlot( _this, CorePropertyObserver_onEvent ), _this->Outlet, 
-      0 );
-}
-
-/* Variants derived from the class : 'Core::PropertyObserver' */
-EW_DEFINE_CLASS_VARIANTS( CorePropertyObserver )
-EW_END_OF_CLASS_VARIANTS( CorePropertyObserver )
-
-/* Virtual Method Table (VMT) for the class : 'Core::PropertyObserver' */
-EW_DEFINE_CLASS( CorePropertyObserver, XObject, OnEvent, OnEvent, OnEvent, Outlet, 
-                 _.VMT, _.VMT, "Core::PropertyObserver" )
-EW_END_OF_CLASS( CorePropertyObserver )
 
 /* Checksum to test compatibility of BLOB files. */
 const unsigned long EwBlobChecksum[] = { 0x00000000, 0x00000000 };

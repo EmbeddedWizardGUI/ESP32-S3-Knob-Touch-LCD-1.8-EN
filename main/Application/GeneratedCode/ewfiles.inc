@@ -7,5 +7,7 @@ EMWIFILES := \
 	Resources.c \
 	Views.c \
 	WidgetSet.c \
-	ExternVideo.c \
-	Application.c
+	Templates.c \
+	Application.c \
+	Accelerator.c \
+	GraphicsSystem.c

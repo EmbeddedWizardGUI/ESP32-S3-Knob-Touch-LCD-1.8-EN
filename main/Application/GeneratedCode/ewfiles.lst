@@ -4,5 +4,7 @@ module Graphics                 file "Graphics.c";
 module Resources                file "Resources.c";
 module Views                    file "Views.c";
 module WidgetSet                file "WidgetSet.c";
-module ExternVideo              file "ExternVideo.c";
+module Templates                file "Templates.c";
 module Application              file "Application.c";
+module Accelerator              file "Accelerator.c";
+module GraphicsSystem           file "GraphicsSystem.c";

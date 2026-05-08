@@ -69,14 +69,9 @@
   #error Wrong version of Embedded Wizard Graphics Engine.
 #endif
 
-#include "_CoreKeyPressHandler.h"
-#include "_CorePropertyObserver.h"
+#include "_AcceleratorAccelerator.h"
 #include "_CoreRoot.h"
-#include "_CoreSystemEventHandler.h"
 #include "_CoreTimer.h"
-#include "_EffectsInt32Effect.h"
-#include "_ResourcesExternVideo.h"
-#include "_ViewsImage.h"
 
 /* Forward declaration of the class Application::Application */
 #ifndef _ApplicationApplication_
@@ -84,40 +79,16 @@
 #define _ApplicationApplication_
 #endif
 
-/* Forward declaration of the class Application::ControlBar */
-#ifndef _ApplicationControlBar_
-  EW_DECLARE_CLASS( ApplicationControlBar )
-#define _ApplicationControlBar_
-#endif
-
-/* Forward declaration of the class Application::DeviceClass */
-#ifndef _ApplicationDeviceClass_
-  EW_DECLARE_CLASS( ApplicationDeviceClass )
-#define _ApplicationDeviceClass_
-#endif
-
-/* Forward declaration of the class Application::DoneMessage */
-#ifndef _ApplicationDoneMessage_
-  EW_DECLARE_CLASS( ApplicationDoneMessage )
-#define _ApplicationDoneMessage_
-#endif
-
-/* Forward declaration of the class Application::ProgressIndicator */
-#ifndef _ApplicationProgressIndicator_
-  EW_DECLARE_CLASS( ApplicationProgressIndicator )
-#define _ApplicationProgressIndicator_
-#endif
-
-/* Forward declaration of the class Application::TimerConfigure */
-#ifndef _ApplicationTimerConfigure_
-  EW_DECLARE_CLASS( ApplicationTimerConfigure )
-#define _ApplicationTimerConfigure_
-#endif
-
 /* Forward declaration of the class Core::Group */
 #ifndef _CoreGroup_
   EW_DECLARE_CLASS( CoreGroup )
 #define _CoreGroup_
+#endif
+
+/* Forward declaration of the class Core::KeyPressHandler */
+#ifndef _CoreKeyPressHandler_
+  EW_DECLARE_CLASS( CoreKeyPressHandler )
+#define _CoreKeyPressHandler_
 #endif
 
 /* Forward declaration of the class Core::LayoutContext */
@@ -138,42 +109,16 @@
 #define _GraphicsCanvas_
 #endif
 
-/* Forward declaration of the class Resources::Bitmap */
-#ifndef _ResourcesBitmap_
-  EW_DECLARE_CLASS( ResourcesBitmap )
-#define _ResourcesBitmap_
-#endif
 
-
-/* Root component of the Standmixer GUI application. For more information, please 
-   visit: https://doc.embedded-wizard.de/ */
+/* This is the root component of the entire GUI application. */
 EW_DEFINE_FIELDS( ApplicationApplication, CoreRoot )
-  EW_OBJECT  ( Background,      ViewsImage )
-  EW_OBJECT  ( BackgroundNext,  ViewsImage )
-  EW_OBJECT  ( BgFadeEffect,    EffectsInt32Effect )
-  EW_OBJECT  ( VideoView,       ViewsImage )
-  EW_OBJECT  ( EncoderObserver, CorePropertyObserver )
-  EW_OBJECT  ( HardButtonHandler, CoreSystemEventHandler )
-  EW_OBJECT  ( HardButtonTimer, CoreTimer )
-  EW_OBJECT  ( KeyEnterHandler, CoreKeyPressHandler )
-  EW_OBJECT  ( KeyLeftHandler,  CoreKeyPressHandler )
-  EW_OBJECT  ( KeyRightHandler, CoreKeyPressHandler )
-  EW_OBJECT  ( KeyHoldGateTimer, CoreTimer )
-  EW_OBJECT  ( VideoSource,     ResourcesExternVideo )
-  EW_ARRAY   ( Backgrounds,     ResourcesBitmap, [6])
-  EW_ARRAY   ( DarkBackgrounds, ResourcesBitmap, [6])
-  EW_VARIABLE( TimerCfg,        ApplicationTimerConfigure )
-  EW_VARIABLE( DoneMsg,         ApplicationDoneMessage )
-  EW_VARIABLE( CtrlBar,         ApplicationControlBar )
-  EW_VARIABLE( ProgressInd,     ApplicationProgressIndicator )
-  EW_VARIABLE( DeviceRef,       ApplicationDeviceClass )
-  EW_ARRAY   ( VideoSources,    XString, [6])
-  EW_VARIABLE( PreviousAdcValue, XInt32 )
-  EW_VARIABLE( TimerState,      XEnum )
+  EW_OBJECT  ( Accelerator,     AcceleratorAccelerator )
 EW_END_OF_FIELDS( ApplicationApplication )
 
 /* Virtual Method Table (VMT) for the class : 'Application::Application' */
 EW_DEFINE_METHODS( ApplicationApplication, CoreRoot )
+  EW_METHOD( initLayoutContext, void )( CoreRectView _this, XRect aBounds, CoreOutline 
+    aOutline )
   EW_METHOD( GetRoot,           CoreRoot )( CoreRoot _this )
   EW_METHOD( Draw,              void )( CoreRoot _this, GraphicsCanvas aCanvas, 
     XRect aClip, XPoint aOffset, XInt32 aOpacity, XBool aBlend )
@@ -194,85 +139,10 @@ EW_DEFINE_METHODS( ApplicationApplication, CoreRoot )
   EW_METHOD( DispatchEvent,     XObject )( CoreRoot _this, CoreEvent aEvent )
   EW_METHOD( BroadcastEvent,    XObject )( CoreRoot _this, CoreEvent aEvent, XSet 
     aFilter )
+  EW_METHOD( UpdateLayout,      void )( CoreGroup _this, XPoint aSize )
+  EW_METHOD( UpdateViewState,   void )( CoreGroup _this, XSet aState )
   EW_METHOD( InvalidateArea,    void )( CoreRoot _this, XRect aArea )
 EW_END_OF_METHODS( ApplicationApplication )
-
-/* The method Init() is invoked automatically after the component has been created. 
-   This method can be overridden and filled with logic containing additional initialization 
-   statements. */
-void ApplicationApplication_Init( ApplicationApplication _this, XHandle aArg );
-
-/* Fade complete - copy new bitmap to Background and hide the overlay */
-void ApplicationApplication_OnBgFadeDone( ApplicationApplication _this, XObject 
-  sender );
-
-/* Central state machine handler: Idle -> Setting -> Running -> Idle */
-void ApplicationApplication_HandleArrowAction( ApplicationApplication _this );
-
-/* Encoder rotation handler - adjusts timer in SETTING state, rotates carousel in 
-   IDLE */
-void ApplicationApplication_onEncoderChange( ApplicationApplication _this, XObject 
-  sender );
-
-/* Hardware button pressed - show press animation and start 200ms auto-release timer */
-void ApplicationApplication_onHardButtonEvent( ApplicationApplication _this, XObject 
-  sender );
-
-/* Auto-release timer fired - play release animation and execute arrow action */
-void ApplicationApplication_OnHardButtonTimerDone( ApplicationApplication _this, 
-  XObject sender );
-
-/* Keyboard Enter key - simulates hardware button press using same auto-release 
-   timer */
-void ApplicationApplication_onKeyEnter( ApplicationApplication _this, XObject sender );
-
-/* Keyboard Left arrow - decreases timer in SETTING, rotates carousel otherwise */
-void ApplicationApplication_onKeyLeft( ApplicationApplication _this, XObject sender );
-
-/* Keyboard Right arrow - increases timer in SETTING, rotates carousel otherwise */
-void ApplicationApplication_onKeyRight( ApplicationApplication _this, XObject sender );
-
-/* Key held down - repeat 1s step with gate timer */
-void ApplicationApplication_onKeyLeftHold( ApplicationApplication _this, XObject 
-  sender );
-
-/* Key held down - repeat 1s step with gate timer */
-void ApplicationApplication_onKeyRightHold( ApplicationApplication _this, XObject 
-  sender );
-
-/* Control bar arrow button released - delegate to the state machine */
-void ApplicationApplication_OnControlBarAction( ApplicationApplication _this, XObject 
-  sender );
-
-/* Countdown reached zero - tear down RUNNING state and show done screen */
-void ApplicationApplication_OnCountdownComplete( ApplicationApplication _this, XObject 
-  sender );
-
-/* Progress tick - syncs MM:SS display with remaining time once per second */
-void ApplicationApplication_OnProgressTick( ApplicationApplication _this, XObject 
-  sender );
-
-/* Done message expired or dismissed - tear down done screen and restore IDLE state */
-void ApplicationApplication_OnDoneExpired( ApplicationApplication _this, XObject 
-  sender );
-
-/* Carousel selection changed - cross-fade background to the newly selected mode */
-void ApplicationApplication_OnSelectionChanged( ApplicationApplication _this, XObject 
-  sender );
-
-/* Carousel touched - immediately dismiss done screen if showing */
-void ApplicationApplication_OnCarouselTouch( ApplicationApplication _this, XObject 
-  sender );
-
-/* Start video playback for the currently selected mode */
-void ApplicationApplication_StartVideo( ApplicationApplication _this );
-
-/* Stop video playback and free decoder memory */
-void ApplicationApplication_StopVideo( ApplicationApplication _this );
-
-/* Handle video state changes - rewind to frame 0 on end-of-stream for looping */
-void ApplicationApplication_OnVideoStateChanged( ApplicationApplication _this, XObject 
-  sender );
 
 #ifdef __cplusplus
   }

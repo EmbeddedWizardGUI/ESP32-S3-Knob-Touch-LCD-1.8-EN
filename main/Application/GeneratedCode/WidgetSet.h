@@ -69,6 +69,27 @@
   #error Wrong version of Embedded Wizard Graphics Engine.
 #endif
 
+#include "_WidgetSetPushButton.h"
+#include "_WidgetSetPushButtonConfig.h"
+#include "_WidgetSetToggleButton.h"
+#include "_WidgetSetToggleButtonConfig.h"
+#include "_WidgetSetWidgetConfig.h"
+
+/* Bitmap resource used per default by the Widgets customized for the small  size. */
+EW_DECLARE_BITMAP_RES( WidgetSetPushButtonSmall )
+
+/* Bitmap resource used per default by the Widgets customized for the small  size. */
+EW_DECLARE_BITMAP_RES( WidgetSetSwitchSmall )
+
+/* This autoobject provides one of the default customizations for the 'toggle' widget 
+   (WidgetSet::ToggleButton) in its small size variant. With this customization 
+   the toggle button appears as a 'switch'. */
+EW_DECLARE_AUTOOBJECT( WidgetSetSwitch_Lime_Small, WidgetSetToggleButtonConfig )
+
+/* This autoobject provides the default customization for the 'push button' widget 
+   (WidgetSet::PushButton) in its small size variant. */
+EW_DECLARE_AUTOOBJECT( WidgetSetPushButton_Lime_Small, WidgetSetPushButtonConfig )
+
 #ifdef __cplusplus
   }
 #endif

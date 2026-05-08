@@ -69,40 +69,17 @@
   #error Wrong version of Embedded Wizard Graphics Engine.
 #endif
 
-#include "_GraphicsArcPath.h"
 #include "_GraphicsCanvas.h"
-#include "_GraphicsPath.h"
 
-/* The definition Graphics::PathJoin enumerates the possible modes how the edges 
-   of a path are connected when stroking the path with path thickness greater than 
-   1 pixel. It is used to determine how Views::StrokePath should raster the path. */
-typedef XEnum GraphicsPathJoin;
+/* The definition Graphics::Edges enumerates the parts of a free scalable frame. 
+   It is used to determine, which parts should be drawn. */
+typedef XSet GraphicsEdges;
 
-#define GraphicsPathJoinBevel                               0
-#define GraphicsPathJoinMiter                               1
-#define GraphicsPathJoinRound                               2
-
-/* The definition Graphics::PathCap enumerates the possible modes how the path caps 
-   are displayed when stroking the path with path thickness greater than 1 pixel. 
-   It is used to determine how Views::StrokePath should raster the path. */
-typedef XEnum GraphicsPathCap;
-
-#define GraphicsPathCapFlat                                 0
-#define GraphicsPathCapSquare                               1
-#define GraphicsPathCapRound                                2
-#define GraphicsPathCapTriangle                             3
-
-/* The definition Graphics::ArcStyle enumerates the possible shapes of an elliptical 
-   arc. It is used to determine the mode how Graphics::ArcPath should calculate 
-   the path data. */
-typedef XEnum GraphicsArcStyle;
-
-#define GraphicsArcStyleArc                                 0
-#define GraphicsArcStyleSegment                             1
-#define GraphicsArcStylePie                                 2
-#define GraphicsArcStylePieRounded                          3
-#define GraphicsArcStylePieRoundedStart                     4
-#define GraphicsArcStylePieRoundedEnd                       5
+#define GraphicsEdgesLeft                                   0x00000001
+#define GraphicsEdgesTop                                    0x00000002
+#define GraphicsEdgesRight                                  0x00000004
+#define GraphicsEdgesBottom                                 0x00000008
+#define GraphicsEdgesInterior                               0x00000010
 
 #ifdef __cplusplus
   }

@@ -75,9 +75,18 @@
 #define _CoreLayoutContext_
 #endif
 
+/* Forward declaration of the class Core::Outline */
+#ifndef _CoreOutline_
+  EW_DECLARE_CLASS( CoreOutline )
+#define _CoreOutline_
+#endif
+
 
 /* Deklaration of class : 'Core::LayoutContext' */
 EW_DEFINE_FIELDS( CoreLayoutContext, XObject )
+  EW_VARIABLE( outline,         CoreOutline )
+  EW_VARIABLE( extent,          XRect )
+  EW_VARIABLE( bounds,          XRect )
   EW_VARIABLE( isEmpty,         XBool )
 EW_END_OF_FIELDS( CoreLayoutContext )
 

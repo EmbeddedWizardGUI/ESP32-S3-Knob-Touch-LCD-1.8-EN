@@ -52,9 +52,7 @@
 *******************************************************************************/
 
 #include "ewlocale.h"
-#include "_GraphicsArcPath.h"
 #include "_GraphicsCanvas.h"
-#include "_GraphicsPath.h"
 #include "_ResourcesBitmap.h"
 #include "_ResourcesFont.h"
 #include "Graphics.h"
@@ -80,18 +78,7 @@ EW_CONST_STRING_PRAGMA static const unsigned short _StringsDefault0[] =
   0x0069, 0x0061, 0x006C, 0x0069, 0x007A, 0x0065, 0x0064, 0x0020, 0x0077, 0x0069,
   0x0074, 0x0068, 0x0020, 0x0061, 0x0020, 0x0067, 0x0072, 0x0061, 0x0070, 0x0068,
   0x0069, 0x0063, 0x0073, 0x0020, 0x0065, 0x006E, 0x0067, 0x0069, 0x006E, 0x0065,
-  0x0020, 0x0062, 0x0069, 0x0074, 0x006D, 0x0061, 0x0070, 0x0000, 0xC557, 0x0053,
-  0x0063, 0x0061, 0x006C, 0x0065, 0x0042, 0x0069, 0x0074, 0x006D, 0x0061, 0x0070,
-  0x0028, 0x0029, 0x0020, 0x006F, 0x0070, 0x0065, 0x0072, 0x0061, 0x0074, 0x0069,
-  0x006F, 0x006E, 0x0020, 0x0068, 0x0061, 0x0073, 0x0020, 0x0062, 0x0065, 0x0065,
-  0x006E, 0x0020, 0x006F, 0x006D, 0x0069, 0x0074, 0x0074, 0x0065, 0x0064, 0x0020,
-  0x0064, 0x0075, 0x0065, 0x0020, 0x0074, 0x006F, 0x0020, 0x0074, 0x0068, 0x0065,
-  0x0020, 0x0072, 0x0065, 0x0073, 0x0075, 0x006C, 0x0074, 0x0069, 0x006E, 0x0067,
-  0x0020, 0x0061, 0x0072, 0x0065, 0x0061, 0x0020, 0x0062, 0x0065, 0x0069, 0x006E,
-  0x0067, 0x0020, 0x0077, 0x0069, 0x0064, 0x0065, 0x0072, 0x0020, 0x006F, 0x0072,
-  0x0020, 0x0068, 0x0069, 0x0067, 0x0068, 0x0065, 0x0072, 0x0020, 0x0074, 0x0068,
-  0x0061, 0x006E, 0x0020, 0x0034, 0x0030, 0x0036, 0x0039, 0x0020, 0x0070, 0x0069,
-  0x0078, 0x0065, 0x006C, 0x002E, 0x0000
+  0x0020, 0x0062, 0x0069, 0x0074, 0x006D, 0x0061, 0x0070, 0x0000
 };
 
 /* Constant values used in this 'C' module only. */
@@ -101,7 +88,6 @@ static const XColor _Const0002 = { 0x00, 0x00, 0x00, 0x00 };
 static const XRect _Const0003 = {{ 0, 0 }, { 0, 0 }};
 static const XStringRes _Const0004 = { _StringsDefault0, 0x003F };
 static const XStringRes _Const0005 = { _StringsDefault0, 0x0072 };
-static const XStringRes _Const0006 = { _StringsDefault0, 0x00B3 };
 
 /* Initializer for the class 'Graphics::Canvas' */
 void GraphicsCanvas__Init( GraphicsCanvas _this, XObject aLink, XHandle aArg )
@@ -366,135 +352,38 @@ void GraphicsCanvas_DrawText( GraphicsCanvas _this, XRect aClip, ResourcesFont a
   }
 }
 
-/* The method StrokePath() strokes within the rectangular area aDstRect of canvas 
-   a path determined by data stored in the Graphics::Path object aPath. All path 
-   coordinates are assumed as being relative to the top-left corner of the aDstRect 
-   area, or if the parameter aFlipY is 'true', relative to the bottom-left corner. 
-   With the parameter aFlipY equal 'true' the path coordinates are mirrored vertically 
-   causing the positive Y-axis to point upwards. With the parameter aOffset the 
-   origin of the path coordinate system can be moved within aDstRect. Accordingly 
-   modifying this value scrolls the displayed path content.
-   The thickness of the path is determined by the parameter aWidth and is expressed 
-   in pixel. The parameters aStartCapStyle and aEndCapStyle determine how the start/end 
-   position of the path are displayed. The possible values are specified in Graphics::PathCap. 
-   Furthermore the parameter aJoinStyle controls how the line segments of the path 
-   are connected together. Here the possible values are specified in Graphics::PathJoin. 
-   Please note, if aJoinStyle is Graphics::PathJoin.Miter, the additional parameter 
-   aMiterLimit determines the max. ratio between the length of the miter and the 
-   half of the path thickness (aWidth / 2). If this limit is exceeded, the affected 
-   corner is joined with an ordinary bevel (Graphics::PathJoin.Bevel) instead of 
-   miter.
-   The parameters aColorTL, aColorTR, aColorBL, aColorBR determine the colors at 
-   the corresponding corners of the aDstRect area. If the parameter aAntialiased 
-   is 'true', the method applies antialiasing while rasterizing the path pixel.
-   The parameter aClip limits the drawing operation. Pixel lying outside this area 
-   remain unchanged. The aBlend parameter controls the mode how drawn pixel are 
-   combined with the pixel already existing in the destination bitmap. If aBlend 
-   is 'true', the drawn pixel are alpha-blended with the background, otherwise the 
-   drawn pixel will overwrite the old content. */
-void GraphicsCanvas_StrokePath( GraphicsCanvas _this, XRect aClip, GraphicsPath 
-  aPath, XRect aDstRect, XBool aFlipY, XPoint aOffset, XFloat aWidth, XEnum aStartCapStyle, 
-  XEnum aEndCapStyle, XEnum aJoinStyle, XFloat aMiterLimit, XColor aColorTL, XColor 
-  aColorTR, XColor aColorBR, XColor aColorBL, XBool aBlend, XBool aAntialiased )
+/* The method DrawBitmapFrame() draws a free scalable frame by composing it of bitmap 
+   segments. These segments are used to draw the frame's corners, to fill its edges 
+   and to fill its interior area. The bitmap has thus to contain nine equal segments 
+   arranged in three rows and three columns. The top-left segment e.g. is used to 
+   draw the top-left corner of the frame. In contrast, the top-middle segment corresponds 
+   to the frame's top edge. If the edge is wider than the segment, multiple copies 
+   of the segment are used to fill the entire edge. In this manner the entire frame 
+   is composed by simply copying bitmap segments.
+   The bitmap is specified in the parameter aBitmap. In case of a multi-frame bitmap 
+   the desired frame can be selected in the parameter aFrameNr. The resulting size 
+   of the drawn frame is specified by aDstRect parameter. The parameter aEdges control 
+   which edges are drawn and which are omitted. Optionally the copied pixel can 
+   be modulated by a color gradient specified by the four parameters aColorTL .. 
+   aColorBL.
+   An additional clipping area aClip limits the operation. All pixel lying outside 
+   this area will not be drawn. The last aBlend parameter controls the mode how 
+   drawn pixel are combined with the pixel already existing in the destination bitmap. 
+   If aBlend is 'true', the drawn pixel are alpha-blended with the background, otherwise 
+   the drawn pixel will overwrite the old content. */
+void GraphicsCanvas_DrawBitmapFrame( GraphicsCanvas _this, XRect aClip, ResourcesBitmap 
+  aBitmap, XInt32 aFrameNr, XRect aDstRect, XSet aEdges, XColor aColorTL, XColor 
+  aColorTR, XColor aColorBR, XColor aColorBL, XBool aBlend )
 {
-  XUInt32 style;
-  XHandle dstBitmap;
-  XInt32 dstFrameNo;
-  XHandle path;
-
-  if ( _this->Super1.bitmap == 0 )
-    ResourcesBitmap__Update( _this );
-
-  if ( _this->Super1.bitmap == 0 )
-    return;
-
-  if (( aPath == 0 ) || ( aPath->path == 0 ))
-    return;
-
-  style = 0;
-
-  switch ( aStartCapStyle )
-  {
-    case GraphicsPathCapSquare :
-      style = 1;
-    break;
-
-    case GraphicsPathCapTriangle :
-      style = 2;
-    break;
-
-    case GraphicsPathCapRound :
-      style = 3;
-    break;
-
-    default :; 
-  }
-
-  switch ( aEndCapStyle )
-  {
-    case GraphicsPathCapSquare :
-      style = style | 256;
-    break;
-
-    case GraphicsPathCapTriangle :
-      style = style | 512;
-    break;
-
-    case GraphicsPathCapRound :
-      style = style | 768;
-    break;
-
-    default :; 
-  }
-
-  switch ( aJoinStyle )
-  {
-    case GraphicsPathJoinMiter :
-      style = style | 65536;
-    break;
-
-    case GraphicsPathJoinRound :
-      style = style | 131072;
-    break;
-
-    default :; 
-  }
-
-  dstBitmap = _this->Super1.bitmap;
-  dstFrameNo = _this->DstFrameNr;
-  path = aPath->path;
-  {
-    EwStrokePath((XBitmap*)dstBitmap, (XPath*)path, dstFrameNo, aClip, aDstRect, aFlipY,
-                  aOffset, aWidth, 1.0f, 0.0f, 0.0f, 1.0f, style, aMiterLimit, aColorTL,
-                  aColorTR, aColorBR, aColorBL, aBlend, aAntialiased );
-  }
-}
-
-/* The method ScaleBitmap() copies and scales an area of a aBitmap into the canvas. 
-   The bitmap is specified in the parameter aBitmap and the desired area to copy 
-   in aSrcRect. In case of a multi-frame bitmap the desired frame can be selected 
-   in the parameter aFrameNr.
-   The destination area in canvas is determined by the parameter aDstRect. The parameters 
-   aColorTL, aColorTR, aColorBL, aColorBR determine the colors or opacities at the 
-   corresponding corners of the aDstRect area.
-   The parameter aClip limits the drawing operation. Pixel lying outside this area 
-   remain unchanged. The aBlend parameter controls the mode how drawn pixel are 
-   combined with the pixel already existing in the destination bitmap. If aBlend 
-   is 'true', the drawn pixel are alpha-blended with the background, otherwise the 
-   drawn pixel will overwrite the old content. The last parameter aFilter controls 
-   the bi-linear filter. If aFilter is 'true', the source bitmap pixel will be bi-linear 
-   filtered in order to get better output. */
-void GraphicsCanvas_ScaleBitmap( GraphicsCanvas _this, XRect aClip, ResourcesBitmap 
-  aBitmap, XInt32 aFrameNr, XRect aDstRect, XRect aSrcRect, XColor aColorTL, XColor 
-  aColorTR, XColor aColorBR, XColor aColorBL, XBool aBlend, XBool aFilter )
-{
-  XFloat top;
-  XFloat left;
-  XFloat right;
-  XFloat bottom;
   XHandle dstBitmap;
   XHandle srcBitmap;
   XInt32 dstFrameNo;
+  XRect srcRect;
+  XBool left;
+  XBool top;
+  XBool right;
+  XBool bottom;
+  XBool interior;
 
   if ( _this->Super1.bitmap == 0 )
     ResourcesBitmap__Update( _this );
@@ -502,30 +391,23 @@ void GraphicsCanvas_ScaleBitmap( GraphicsCanvas _this, XRect aClip, ResourcesBit
   if ( _this->Super1.bitmap == 0 )
     return;
 
-  if (((( aBitmap == 0 ) || ( aBitmap->bitmap == 0 )) || ( aFrameNr < 0 )) || ( 
-      aFrameNr >= aBitmap->NoOfFrames ))
+  if ((((( aBitmap == 0 ) || ( aBitmap->bitmap == 0 )) || !aEdges ) || ( aFrameNr 
+      < 0 )) || ( aFrameNr >= aBitmap->NoOfFrames ))
     return;
-
-  top = (XFloat)aDstRect.Point1.Y;
-  left = (XFloat)aDstRect.Point1.X;
-  right = (XFloat)aDstRect.Point2.X;
-  bottom = (XFloat)aDstRect.Point2.Y;
-
-  if ((((( right - left ) > 4096.0f ) || (( right - left ) < -4096.0f )) || (( bottom 
-      - top ) > 4096.0f )) || (( bottom - top ) < -4096.0f ))
-  {
-    EwTrace( "%s", EwLoadString( &_Const0006 ));
-    return;
-  }
 
   dstBitmap = _this->Super1.bitmap;
   srcBitmap = aBitmap->bitmap;
   dstFrameNo = _this->DstFrameNr;
+  srcRect = EwNewRect2Point( _Const0000, aBitmap->FrameSize );
+  left = (( aEdges & GraphicsEdgesLeft ) == GraphicsEdgesLeft );
+  top = (( aEdges & GraphicsEdgesTop ) == GraphicsEdgesTop );
+  right = (( aEdges & GraphicsEdgesRight ) == GraphicsEdgesRight );
+  bottom = (( aEdges & GraphicsEdgesBottom ) == GraphicsEdgesBottom );
+  interior = (( aEdges & GraphicsEdgesInterior ) == GraphicsEdgesInterior );
   {
-    EwWarpBitmap((XBitmap*)dstBitmap, (XBitmap*)srcBitmap, dstFrameNo, aFrameNr, aClip,
-                  left,  top,    1.0f, right, top,    1.0f,
-                  right, bottom, 1.0f, left,  bottom, 1.0f,
-                  aSrcRect, aColorTL, aColorTR, aColorBR, aColorBL, aBlend, aFilter );
+    EwDrawBitmapFrame((XBitmap*)dstBitmap, (XBitmap*)srcBitmap, dstFrameNo, aFrameNr,
+                       aClip, aDstRect, srcRect, left, top, right, bottom,
+                       interior, aColorTL, aColorTR, aColorBR, aColorBL, aBlend );
   }
 }
 
@@ -607,638 +489,5 @@ EW_DEFINE_CLASS( GraphicsCanvas, ResourcesBitmap, group, group, InvalidArea, Inv
   GraphicsCanvas_OnSetFrameSize,
   GraphicsCanvas_Update,
 EW_END_OF_CLASS( GraphicsCanvas )
-
-/* Initializer for the class 'Graphics::Path' */
-void GraphicsPath__Init( GraphicsPath _this, XObject aLink, XHandle aArg )
-{
-  /* At first initialize the super class ... */
-  XObject__Init( &_this->_.Super, aLink, aArg );
-
-  /* Allow the Immediate Garbage Collection to evalute the members of this class. */
-  _this->_.XObject._.GCT = EW_CLASS_GCT( GraphicsPath );
-
-  /* Setup the VMT pointer */
-  _this->_.VMT = EW_CLASS( GraphicsPath );
-}
-
-/* Re-Initializer for the class 'Graphics::Path' */
-void GraphicsPath__ReInit( GraphicsPath _this )
-{
-  /* At first re-initialize the super class ... */
-  XObject__ReInit( &_this->_.Super );
-}
-
-/* Finalizer method for the class 'Graphics::Path' */
-void GraphicsPath__Done( GraphicsPath _this )
-{
-  /* Call the user defined destructor of the class */
-  GraphicsPath_Done( _this );
-
-  /* Finalize this class */
-  _this->_.Super._.VMT = EW_CLASS( XObject );
-
-  /* Don't forget to deinitialize the super class ... */
-  XObject__Done( &_this->_.Super );
-}
-
-/* 'C' function for method : 'Graphics::Path.Done()' */
-void GraphicsPath_Done( GraphicsPath _this )
-{
-  XHandle handle;
-
-  if ( _this->path == 0 )
-    return;
-
-  handle = _this->path;
-  EwFreePath((XPath*)handle );
-  _this->path = 0;
-}
-
-/* 'C' function for method : 'Graphics::Path.onUpdate()' */
-void GraphicsPath_onUpdate( GraphicsPath _this, XObject sender )
-{
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( sender );
-
-  EwNotifyObjObservers((XObject)_this, 0 );
-}
-
-/* The method AddArc() adds to the sub-path a new elliptical arc composed of exact 
-   aNoOfEdges straight line segments. The more edges the more smooth the resulting 
-   curve. The center of the ellipse is determined in the parameters aCenterX, aCenterY. 
-   The parameters aRadiusX and aRadiusY determine the horizontal and vertical radius 
-   of the ellipse. The start and the end angle of the arc is determined in the parameters 
-   aStartAngle and aEndAngle, both expressed in degree and measured clockwise relative 
-   to the positive X-axis of the path coordinate system.
-   If the absolute difference between aStartAngle and aEndAngle is equal to or greater 
-   than 360.0, the method calculates with a closed ellipse instead of an opened 
-   arc. If the parameters aRadiusX and aRadiusY are equal, the method calculates 
-   with a circle instead of an ellipse.
-   If the affected sub-path contains already curve information, the end of the last 
-   existing segment and the start of the new arc (resulting from the parameter aStartAngle) 
-   are connected with an additional straight line segment. Similarly, if start position 
-   for the sub-path has been specified by using the @Begin() method, an additional 
-   line segment is added to connect the arc with the given sub-path start position. 
-   After the elliptical arc curve is added, the sub-path actual position is adjusted 
-   to refer to the end of the last line segment of the curve (resulting from the 
-   parameter aEndAngle).
-   The specified position aX, aY is relative to the origin of the path coordinate 
-   system. If the path own matrix is not an identity matrix, the corresponding transformations 
-   are applied on the resulting arc segments before storing them in the sub-path. 
-   See methods @Translate(), @Scale() and @Rotate().
-   The method returns the index of the node within the sub-path where the start 
-   position of the first arc line segment has been stored (parameter aStartAngle). 
-   Knowing this index and the number of segments the arc curve is composed of (aNoOfEdges), 
-   the position of every arc line segment can be modified later by using the method 
-   @SetNode().
-   If the sub-path has not been initialized previously by using the method @InitSubPath(), 
-   the sub-path has been closed by @Close() method or the memory reserved for the 
-   sub-path (see parameter aMaxNoOfEdges in the method @InitSubPath()) is occupied 
-   by other edges so no sufficient space is available to accommodate aNoOfEdges 
-   new segments, the method fails and returns 0.
-   The affected sub-path is determined in the parameter aSubPathNo. Within the path 
-   all existing sub-paths are numbered starting with the value 0 for the first sub-path, 
-   1 for the second and so far. The maximum number of sub-paths the path can manage 
-   is determined by the method @SetMaxNoOfSubPaths(). */
-XInt32 GraphicsPath_AddArc( GraphicsPath _this, XInt32 aSubPathNo, XFloat aCenterX, 
-  XFloat aCenterY, XFloat aRadiusX, XFloat aRadiusY, XFloat aStartAngle, XFloat 
-  aEndAngle, XInt32 aNoOfEdges )
-{
-  XHandle handle;
-  XInt32 result;
-
-  EwPostSignal( EwNewSlot( _this, GraphicsPath_onUpdate ), ((XObject)_this ));
-  handle = _this->path;
-  result = 0;
-  {
-    result = EwAddSubPathArc((XPath*)handle, aSubPathNo, aCenterX, aCenterY,
-                              aRadiusX, aRadiusY, aStartAngle, aEndAngle,
-                              aNoOfEdges );
-  }
-  return result;
-}
-
-/* The method Close() marks the affected sub-path as closed. The method verifies 
-   whether the first and the last position of the sub-path are equal and if this 
-   is not the case, adds an additional straight line segment to the sub-path in 
-   order to connect them together.
-   Once the method is invoked, no additional path information can be added to the 
-   affected sub-path unless it is initialized or cleared again by using the method 
-   @InitSubPath() or @Begin(). If the affected sub-path is empty, the method returns 
-   without any effect.
-   Within the path all existing sub-paths are numbered starting with the value 0 
-   for the first sub-path, 1 for the second and so far. The maximum number of sub-paths 
-   the path can manage is determined by the method @SetMaxNoOfSubPaths(). */
-void GraphicsPath_Close( GraphicsPath _this, XInt32 aSubPathNo )
-{
-  XHandle handle;
-
-  EwPostSignal( EwNewSlot( _this, GraphicsPath_onUpdate ), ((XObject)_this ));
-  handle = _this->path;
-  EwCloseSubPath((XPath*)handle, aSubPathNo );
-}
-
-/* The method Begin() sets the parameters aX, aY as the start position for the sub-path 
-   with the specified number aSubPathNo. The affected sub-path has to be initialized 
-   previously by invoking the method @InitSubPath(). Beginning with the specified 
-   position, the path can be filled with curve data by using methods like @AddLine(), 
-   @AddBezier2(), @AddArc(), etc.
-   The specified position aX, aY is relative to the origin of the path coordinate 
-   system. If the path own matrix is not an identity matrix, the corresponding transformations 
-   are applied on the position before storing it in the sub-path. See methods @Translate(), 
-   @Scale() and @Rotate().
-   Every sub-path contains exact one start position. Calling this method for a sub-path 
-   being already filled with edge coordinates will clear the actual sub-path as 
-   if the @InitSubPath() method has been called before.
-   Within the path all existing sub-paths are numbered starting with the value 0 
-   for the first sub-path, 1 for the second and so far. The maximum number of sub-paths 
-   the path can manage is determined by the method @SetMaxNoOfSubPaths(). */
-void GraphicsPath_Begin( GraphicsPath _this, XInt32 aSubPathNo, XFloat aX, XFloat 
-  aY )
-{
-  XHandle handle;
-
-  EwPostSignal( EwNewSlot( _this, GraphicsPath_onUpdate ), ((XObject)_this ));
-  handle = _this->path;
-  EwBeginSubPath((XPath*)handle, aSubPathNo, aX, aY );
-}
-
-/* The method InitSubPath() prepares the sub-path with the number aSubPathNo to 
-   be able to store up to aMaxNoOfEdges path edges (straight line segments). With 
-   this operation memory for the sub-path data is reserved. Initially the just initialized 
-   sub-path is considered as being empty. To fill the sub-path with data use the 
-   methods like @AddLine(), @AddBezier2(), @AddArc(), etc.
-   If the affected sub-path has been already initialized in the past, the old information 
-   is discarded before initializing the new sub-path. Passing 0 (zero) in the parameter 
-   aMaxNoOfEdges results in the old sub-path data being simply released without 
-   allocating the memory for the new sub-path.
-   If successful, the method returns 'true'. If there is no memory available for 
-   the specified number of edges, the method fails and 'false' is returned leaving 
-   the sub-path not initialized. Similarly, trying to initialize a sub-path not 
-   existing in the path causes the method to return 'false'.
-   Within the path all existing sub-paths are numbered starting with the value 0 
-   for the first sub-path, 1 for the second and so far. The maximum number of sub-paths 
-   the path can manage is determined by the method @SetMaxNoOfSubPaths(). */
-XBool GraphicsPath_InitSubPath( GraphicsPath _this, XInt32 aSubPathNo, XInt32 aMaxNoOfEdges )
-{
-  XHandle handle;
-  XBool result;
-
-  if (( _this->path == 0 ) && ( aSubPathNo == 0 ))
-    GraphicsPath_SetMaxNoOfSubPaths( _this, 1 );
-
-  EwPostSignal( EwNewSlot( _this, GraphicsPath_onUpdate ), ((XObject)_this ));
-  handle = _this->path;
-  result = 0;
-  result = EwInitSubPath((XPath*)handle, aSubPathNo, aMaxNoOfEdges );
-  return result;
-}
-
-/* The method GetMaxNoOfSubPaths() returns how many sub-paths the affected path 
-   can maximally store. The returned value corresponds to the parameter passed in 
-   the invocation of the @SetMaxNoOfSubPaths() method. */
-XInt32 GraphicsPath_GetMaxNoOfSubPaths( GraphicsPath _this )
-{
-  XHandle handle;
-  XInt32 result;
-
-  if ( _this->path == 0 )
-    return 1;
-
-  handle = _this->path;
-  result = 0;
-  result = EwGetMaxNoOfSubPaths((XPath*)handle );
-  return result;
-}
-
-/* The method SetMaxNoOfSubPaths() changes the number of sub-paths the affected 
-   path can maximally manage to the specified value aMaxNoOfSubPaths. After modifying 
-   its size the affected path is empty. This means all contents of previously existing 
-   sub-paths are discarded. Before new path data can be stored in a sub-path the 
-   method @InitSubPath() should be called. Please note, if the size of the path 
-   does already correspond to the parameter aMaxNoOfSubPaths, the path remains unaffected 
-   and retains all existing contents.
-   The method returns 'true' if the path could be initialized with the new size. 
-   In case, there is no sufficient memory to store the desired number of sub-paths, 
-   the method fails and returns 'false' leaving the path empty. */
-XBool GraphicsPath_SetMaxNoOfSubPaths( GraphicsPath _this, XInt32 aMaxNoOfSubPaths )
-{
-  XHandle handle;
-
-  if ( aMaxNoOfSubPaths < 1 )
-    aMaxNoOfSubPaths = 1;
-
-  if (( _this->path != 0 ) && ( GraphicsPath_GetMaxNoOfSubPaths( _this ) == aMaxNoOfSubPaths ))
-    return 1;
-
-  handle = _this->path;
-  {
-    EwFreePath((XPath*)handle );
-    handle = (XHandle)EwCreatePath( aMaxNoOfSubPaths );
-  }
-  _this->path = handle;
-  EwPostSignal( EwNewSlot( _this, GraphicsPath_onUpdate ), ((XObject)_this ));
-  return (XBool)( _this->path != 0 );
-}
-
-/* Variants derived from the class : 'Graphics::Path' */
-EW_DEFINE_CLASS_VARIANTS( GraphicsPath )
-EW_END_OF_CLASS_VARIANTS( GraphicsPath )
-
-/* Virtual Method Table (VMT) for the class : 'Graphics::Path' */
-EW_DEFINE_CLASS( GraphicsPath, XObject, _.VMT, _.VMT, _.VMT, _.VMT, _.VMT, _.VMT, 
-                 "Graphics::Path" )
-EW_END_OF_CLASS( GraphicsPath )
-
-/* Initializer for the class 'Graphics::ArcPath' */
-void GraphicsArcPath__Init( GraphicsArcPath _this, XObject aLink, XHandle aArg )
-{
-  /* At first initialize the super class ... */
-  GraphicsPath__Init( &_this->_.Super, aLink, aArg );
-
-  /* Allow the Immediate Garbage Collection to evalute the members of this class. */
-  _this->_.XObject._.GCT = EW_CLASS_GCT( GraphicsArcPath );
-
-  /* Setup the VMT pointer */
-  _this->_.VMT = EW_CLASS( GraphicsArcPath );
-
-  /* ... and initialize objects, variables, properties, etc. */
-  _this->EndAngle = 360.0f;
-  _this->Style = GraphicsArcStyleArc;
-}
-
-/* Re-Initializer for the class 'Graphics::ArcPath' */
-void GraphicsArcPath__ReInit( GraphicsArcPath _this )
-{
-  /* At first re-initialize the super class ... */
-  GraphicsPath__ReInit( &_this->_.Super );
-}
-
-/* Finalizer method for the class 'Graphics::ArcPath' */
-void GraphicsArcPath__Done( GraphicsArcPath _this )
-{
-  /* Finalize this class */
-  _this->_.Super._.VMT = EW_CLASS( GraphicsPath );
-
-  /* Don't forget to deinitialize the super class ... */
-  GraphicsPath__Done( &_this->_.Super );
-}
-
-/* 'C' function for method : 'Graphics::ArcPath.updatePath()' */
-void GraphicsArcPath_updatePath( GraphicsArcPath _this, XObject sender )
-{
-  XFloat angle;
-  XInt32 noOfEdges;
-
-  /* Dummy expressions to avoid the 'C' warning 'unused argument'. */
-  EW_UNUSED_ARG( sender );
-
-  angle = _this->EndAngle - _this->StartAngle;
-
-  if (( angle >= 360.0f ) || ( angle <= -360.0f ))
-    angle = 360.0f;
-
-  GraphicsPath_SetMaxNoOfSubPaths((GraphicsPath)_this, 2 );
-
-  {
-    XFloat r = EwGetFloatMax( 2, _this->RadiusX, _this->RadiusY );
-    noOfEdges = 1 + ( 90 / (XInt32)EwMathArcCos( 1.0f - ( 0.5f / ( r + 1.0f ))));
-    noOfEdges *= 4;
-
-    if ( angle < 360.0f )
-      noOfEdges = (XInt32)(( angle * noOfEdges ) / 360.0f );
-
-    noOfEdges = EwGetInt32Max( 3, noOfEdges, -noOfEdges, 1 );
-  }
-
-  if (((( angle == 0.0f ) || ( _this->RadiusX == 0.0f )) || ( _this->RadiusY == 
-      0.0f )) || ((((( _this->Style == GraphicsArcStylePie ) || ( _this->Style == 
-      GraphicsArcStylePieRounded )) || ( _this->Style == GraphicsArcStylePieRoundedStart )) 
-      || ( _this->Style == GraphicsArcStylePieRoundedEnd )) && (( 0.0f >= _this->RadiusX ) 
-      || ( 0.0f >= _this->RadiusY ))))
-  {
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 0, 0 );
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 1, 0 );
-    return;
-  }
-
-  if ( angle == 360.0f )
-  {
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 0, noOfEdges + 1 );
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 1, 0 );
-    GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-    0.0f, 360.0f, noOfEdges );
-    GraphicsPath_Close((GraphicsPath)_this, 0 );
-    return;
-  }
-
-  if ( _this->Style == GraphicsArcStyleArc )
-  {
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 0, noOfEdges + 1 );
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 1, 0 );
-    GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-    _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-    return;
-  }
-
-  if ( _this->Style == GraphicsArcStyleSegment )
-  {
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 0, noOfEdges + 1 );
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 1, 0 );
-    GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-    _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-    GraphicsPath_Close((GraphicsPath)_this, 0 );
-    return;
-  }
-
-  if ( _this->Style == GraphicsArcStylePie )
-  {
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 0, noOfEdges + 1 );
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 1, 0 );
-    GraphicsPath_Begin((GraphicsPath)_this, 0, 0.0f, 0.0f );
-    GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-    _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-    GraphicsPath_Close((GraphicsPath)_this, 0 );
-    return;
-  }
-
-  if ( _this->Style == GraphicsArcStylePieRoundedStart )
-  {
-    XFloat ox = _this->RadiusX * EwMathCos( _this->StartAngle );
-    XFloat oy = _this->RadiusY * EwMathSin( _this->StartAngle );
-    XFloat dia = EwMathSqrt(( ox * ox ) + ( oy * oy ));
-    XInt32 noOfEdgesDia = (XInt32)( dia * 0.25f ) + 3;
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 0, ( noOfEdges + noOfEdgesDia ) 
-    + 2 );
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 1, 0 );
-    GraphicsPath_Begin((GraphicsPath)_this, 0, 0.0f, 0.0f );
-
-    if ( angle >= 0.0f )
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, ox / 2.0f, oy / 2.0f, dia / 2.0f, 
-      dia / 2.0f, _this->StartAngle + 180.0f, _this->StartAngle + 360.0f, noOfEdgesDia );
-    else
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, ox / 2.0f, oy / 2.0f, dia / 2.0f, 
-      dia / 2.0f, _this->StartAngle + 180.0f, _this->StartAngle, noOfEdgesDia );
-
-    GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-    _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-    GraphicsPath_Close((GraphicsPath)_this, 0 );
-    return;
-  }
-
-  if ( _this->Style == GraphicsArcStylePieRoundedEnd )
-  {
-    XFloat ea = _this->StartAngle + angle;
-    XFloat ox = _this->RadiusX * EwMathCos( ea );
-    XFloat oy = _this->RadiusY * EwMathSin( ea );
-    XFloat dia = EwMathSqrt(( ox * ox ) + ( oy * oy ));
-    XInt32 noOfEdgesDia = (XInt32)( dia * 0.25f ) + 3;
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 0, ( noOfEdges + noOfEdgesDia ) 
-    + 2 );
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 1, 0 );
-    GraphicsPath_Begin((GraphicsPath)_this, 0, 0.0f, 0.0f );
-    GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-    _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-
-    if ( angle >= 0.0f )
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, ox / 2.0f, oy / 2.0f, dia / 2.0f, 
-      dia / 2.0f, ea, ea + 180.0f, noOfEdgesDia );
-    else
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, ox / 2.0f, oy / 2.0f, dia / 2.0f, 
-      dia / 2.0f, ea, ea - 180.0f, noOfEdgesDia );
-
-    GraphicsPath_Close((GraphicsPath)_this, 0 );
-    return;
-  }
-
-  if ( _this->Style == GraphicsArcStylePieRounded )
-  {
-    XFloat sox = _this->RadiusX * EwMathCos( _this->StartAngle );
-    XFloat soy = _this->RadiusY * EwMathSin( _this->StartAngle );
-    XFloat sdia = EwMathSqrt(( sox * sox ) + ( soy * soy ));
-    XFloat ea = _this->StartAngle + angle;
-    XFloat eox = _this->RadiusX * EwMathCos( ea );
-    XFloat eoy = _this->RadiusY * EwMathSin( ea );
-    XFloat edia = EwMathSqrt(( eox * eox ) + ( eoy * eoy ));
-    XInt32 noOfEdgesSDia = (XInt32)( sdia * 0.25f ) + 3;
-    XInt32 noOfEdgesEDia = (XInt32)( edia * 0.25f ) + 3;
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 0, (( noOfEdges + noOfEdgesSDia ) 
-    + noOfEdgesEDia ) + 10 );
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 1, 0 );
-    GraphicsPath_Begin((GraphicsPath)_this, 0, 0.0f, 0.0f );
-
-    if ( angle >= 0.0f )
-    {
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, sox / 2.0f, soy / 2.0f, sdia / 
-      2.0f, sdia / 2.0f, _this->StartAngle + 180.0f, _this->StartAngle + 360.0f, 
-      noOfEdgesSDia );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-      _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, eox / 2.0f, eoy / 2.0f, edia / 
-      2.0f, edia / 2.0f, ea, ea + 180.0f, noOfEdgesEDia );
-    }
-    else
-    {
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, sox / 2.0f, soy / 2.0f, sdia / 
-      2.0f, sdia / 2.0f, _this->StartAngle + 180.0f, _this->StartAngle, noOfEdgesSDia );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-      _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, eox / 2.0f, eoy / 2.0f, edia / 
-      2.0f, edia / 2.0f, ea, ea - 180.0f, noOfEdgesEDia );
-    }
-
-    GraphicsPath_Close((GraphicsPath)_this, 0 );
-    return;
-  }
-
-  if ( _this->Style == GraphicsArcStylePie )
-  {
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 0, ( noOfEdges * 2 ) + 1 );
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 1, 0 );
-    GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-    _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-    GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, 0.0f, 0.0f, _this->EndAngle, 
-    _this->EndAngle - angle, noOfEdges );
-    GraphicsPath_Close((GraphicsPath)_this, 0 );
-    return;
-  }
-
-  if ( _this->Style == GraphicsArcStylePieRoundedStart )
-  {
-    XFloat sin = EwMathSin( _this->StartAngle );
-    XFloat cos = EwMathCos( _this->StartAngle );
-    XFloat ox = _this->RadiusX * cos;
-    XFloat oy = _this->RadiusY * sin;
-    XFloat dia = EwMathSqrt(( ox * ox ) + ( oy * oy ));
-    XInt32 noOfEdgesDia = (XInt32)( dia * 0.25f ) + 3;
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 0, (( noOfEdges * 2 ) + noOfEdgesDia ) 
-    + 2 );
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 1, 0 );
-
-    if ( angle >= 0.0f )
-    {
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-      _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, 0.0f, 0.0f, _this->EndAngle, 
-      _this->EndAngle - angle, noOfEdges );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, ox / 2.0f, oy / 2.0f, dia / 2.0f, 
-      dia / 2.0f, _this->StartAngle + 180.0f, _this->StartAngle + 360.0f, noOfEdgesDia );
-    }
-    else
-    {
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-      _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, 0.0f, 0.0f, _this->EndAngle, 
-      _this->EndAngle - angle, noOfEdges );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, ox / 2.0f, oy / 2.0f, dia / 2.0f, 
-      dia / 2.0f, _this->StartAngle + 180.0f, _this->StartAngle, noOfEdgesDia );
-    }
-
-    GraphicsPath_Close((GraphicsPath)_this, 0 );
-    return;
-  }
-
-  if ( _this->Style == GraphicsArcStylePieRoundedEnd )
-  {
-    XFloat ea = _this->StartAngle + angle;
-    XFloat sin = EwMathSin( ea );
-    XFloat cos = EwMathCos( ea );
-    XFloat ox = _this->RadiusX * cos;
-    XFloat oy = _this->RadiusY * sin;
-    XFloat dia = EwMathSqrt(( ox * ox ) + ( oy * oy ));
-    XInt32 noOfEdgesDia = (XInt32)( dia * 0.25f ) + 3;
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 0, (( noOfEdges * 2 ) + noOfEdgesDia ) 
-    + 2 );
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 1, 0 );
-
-    if ( angle >= 0.0f )
-    {
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-      _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, ox / 2.0f, oy / 2.0f, dia / 2.0f, 
-      dia / 2.0f, ea, ea + 180.0f, noOfEdgesDia );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, 0.0f, 0.0f, _this->EndAngle, 
-      _this->EndAngle - angle, noOfEdges );
-    }
-    else
-    {
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-      _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, ox / 2.0f, oy / 2.0f, dia / 2.0f, 
-      dia / 2.0f, ea, ea - 180.0f, noOfEdgesDia );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, 0.0f, 0.0f, _this->EndAngle, 
-      _this->EndAngle - angle, noOfEdges );
-    }
-
-    GraphicsPath_Close((GraphicsPath)_this, 0 );
-    return;
-  }
-
-  if ( _this->Style == GraphicsArcStylePieRounded )
-  {
-    XFloat ea = _this->StartAngle + angle;
-    XFloat ssin = EwMathSin( _this->StartAngle );
-    XFloat scos = EwMathCos( _this->StartAngle );
-    XFloat esin = EwMathSin( ea );
-    XFloat ecos = EwMathCos( ea );
-    XFloat sox = _this->RadiusX * scos;
-    XFloat soy = _this->RadiusY * ssin;
-    XFloat eox = _this->RadiusX * ecos;
-    XFloat eoy = _this->RadiusY * esin;
-    XFloat sdia = EwMathSqrt(( sox * sox ) + ( soy * soy ));
-    XFloat edia = EwMathSqrt(( eox * eox ) + ( eoy * eoy ));
-    XInt32 noOfEdgesSDia = (XInt32)( sdia * 0.25f ) + 3;
-    XInt32 noOfEdgesEDia = (XInt32)( edia * 0.25f ) + 3;
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 0, ((( noOfEdges * 2 ) + noOfEdgesSDia ) 
-    + noOfEdgesEDia ) + 4 );
-    GraphicsPath_InitSubPath((GraphicsPath)_this, 1, 0 );
-
-    if ( angle >= 0.0f )
-    {
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-      _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, eox / 2.0f, eoy / 2.0f, edia / 
-      2.0f, edia / 2.0f, ea, ea + 180.0f, noOfEdgesEDia );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, 0.0f, 0.0f, _this->EndAngle, 
-      _this->EndAngle - angle, noOfEdges );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, sox / 2.0f, soy / 2.0f, sdia / 
-      2.0f, sdia / 2.0f, _this->StartAngle + 180.0f, _this->StartAngle + 360.0f, 
-      noOfEdgesSDia );
-    }
-    else
-    {
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, _this->RadiusX, _this->RadiusY, 
-      _this->StartAngle, _this->StartAngle + angle, noOfEdges );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, eox / 2.0f, eoy / 2.0f, edia / 
-      2.0f, edia / 2.0f, ea, ea - 180.0f, noOfEdgesEDia );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, 0.0f, 0.0f, 0.0f, 0.0f, _this->EndAngle, 
-      _this->EndAngle - angle, noOfEdges );
-      GraphicsPath_AddArc((GraphicsPath)_this, 0, sox / 2.0f, soy / 2.0f, sdia / 
-      2.0f, sdia / 2.0f, _this->StartAngle + 180.0f, _this->StartAngle, noOfEdgesSDia );
-    }
-
-    GraphicsPath_Close((GraphicsPath)_this, 0 );
-    return;
-  }
-}
-
-/* 'C' function for method : 'Graphics::ArcPath.OnSetEndAngle()' */
-void GraphicsArcPath_OnSetEndAngle( GraphicsArcPath _this, XFloat value )
-{
-  if ( value == _this->EndAngle )
-    return;
-
-  _this->EndAngle = value;
-
-  if (( _this->RadiusX > 0.0f ) && ( _this->RadiusY > 0.0f ))
-    EwPostSignal( EwNewSlot( _this, GraphicsArcPath_updatePath ), ((XObject)_this ));
-}
-
-/* 'C' function for method : 'Graphics::ArcPath.OnSetStartAngle()' */
-void GraphicsArcPath_OnSetStartAngle( GraphicsArcPath _this, XFloat value )
-{
-  if ( value == _this->StartAngle )
-    return;
-
-  _this->StartAngle = value;
-
-  if (( _this->RadiusX > 0.0f ) && ( _this->RadiusY > 0.0f ))
-    EwPostSignal( EwNewSlot( _this, GraphicsArcPath_updatePath ), ((XObject)_this ));
-}
-
-/* 'C' function for method : 'Graphics::ArcPath.OnSetRadius()' */
-void GraphicsArcPath_OnSetRadius( GraphicsArcPath _this, XFloat value )
-{
-  if (( value == _this->RadiusX ) && ( value == _this->RadiusY ))
-    return;
-
-  _this->RadiusX = value;
-  _this->RadiusY = value;
-
-  if ( _this->StartAngle != _this->EndAngle )
-    EwPostSignal( EwNewSlot( _this, GraphicsArcPath_updatePath ), ((XObject)_this ));
-}
-
-/* 'C' function for method : 'Graphics::ArcPath.OnSetStyle()' */
-void GraphicsArcPath_OnSetStyle( GraphicsArcPath _this, XEnum value )
-{
-  if ( value == _this->Style )
-    return;
-
-  _this->Style = value;
-
-  if ((( _this->StartAngle != _this->EndAngle ) && ( _this->RadiusX > 0.0f )) && 
-      ( _this->RadiusY > 0.0f ))
-    EwPostSignal( EwNewSlot( _this, GraphicsArcPath_updatePath ), ((XObject)_this ));
-}
-
-/* Variants derived from the class : 'Graphics::ArcPath' */
-EW_DEFINE_CLASS_VARIANTS( GraphicsArcPath )
-EW_END_OF_CLASS_VARIANTS( GraphicsArcPath )
-
-/* Virtual Method Table (VMT) for the class : 'Graphics::ArcPath' */
-EW_DEFINE_CLASS( GraphicsArcPath, GraphicsPath, _.VMT, _.VMT, _.VMT, _.VMT, _.VMT, 
-                 _.VMT, "Graphics::ArcPath" )
-EW_END_OF_CLASS( GraphicsArcPath )
 
 /* Embedded Wizard */
