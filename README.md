@@ -111,6 +111,8 @@ The VSCode status bar provides one-click access to build, flash, and monitor. Yo
 
 ### Build and Flash
 
+> **Important — dual-MCU board:** The Waveshare board actually carries **two** MCUs side by side: the **ESP32-S3** (ESP32-S3R8, dual-core Xtensa LX7 — the chip this project targets) and a secondary **ESP32** (ESP32-U4WDH, dual-core Xtensa LX6, used by Waveshare for low-level / wireless tasks). They share the single USB-C connector through an on-board CH445P analog switch, and the **orientation of the USB-C plug decides which of the two MCUs is exposed to the host PC and the IDE**. If your COM port does not appear, or `idf.py flash` cannot find the device or connects to the wrong chip, simply unplug the USB-C cable, flip it 180°, and plug it back in to switch the bridge over to the ESP32-S3. This Build Environment runs entirely on the ESP32-S3; the secondary ESP32 is left as it ships from Waveshare and is not used or programmed by Embedded Wizard here.
+
 1. **Generate code** from your Embedded Wizard Studio project:
    - Open one of the example projects (`.ewp`) in Embedded Wizard Studio
    - Select **Build > Build this profile** (or press **F8**)
