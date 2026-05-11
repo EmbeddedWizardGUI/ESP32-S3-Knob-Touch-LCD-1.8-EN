@@ -16,7 +16,7 @@
 
 This repository contains a **maker-oriented Build Environment** for the Waveshare ESP32-S3-Knob-Touch-LCD-1.8 board. It is maintained independently from the official Embedded Wizard release cycle to provide quick access to community-supported target platforms. For officially supported platforms and regular releases, please visit the [Embedded Wizard download page](https://www.embedded-wizard.de/get-started/).
 
-> **Looking for an officially supported Espressif board?** Embedded Wizard ships ready-to-use Build Environments for selected Espressif evaluation kits with full official support. See the [list of officially supported Espressif devices](https://www.embedded-wizard.de/get-started?search=espressif) on the Get Started page.
+> Embedded Wizard ships ready-to-use Build Environments for selected Espressif evaluation kits with full official support. See the [list of officially supported Espressif devices](https://www.embedded-wizard.de/get-started?search=espressif) on the Get Started page.
 
 **Embedded Wizard is free of charge for private projects.** The Community License allows you to develop, build, and deploy applications on your target hardware at no cost, with no feature restrictions.
 
